@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtesiCris_client.a  CMakeFiles/tesiCris_client.dir/src/appStruct.cpp.o CMakeFiles/tesiCris_client.dir/src/framework.cpp.o CMakeFiles/tesiCris_client.dir/src/mqtt.cpp.o CMakeFiles/tesiCris_client.dir/src/topics.cpp.o
+/usr/bin/ranlib libtesiCris_client.a

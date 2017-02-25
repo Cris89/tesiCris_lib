@@ -1,0 +1,48 @@
+###############################################
+##           Configuration file              ##
+###############################################
+
+message( STATUS "" )
+message( STATUS "*********************************" )
+message( STATUS "**        CONFIG STATUS        **" )
+message( STATUS "*********************************" )
+message( STATUS "Install prefix..................: ${CMAKE_INSTALL_PREFIX}" )
+
+# --- print the result of the configuration
+if( LIB_STATIC )
+        message( STATUS "Library type....................: STATIC" )
+else( LIB_STATIC )
+        message( STATUS "Library type....................: DYNAMIC" )
+endif( LIB_STATIC )
+
+# check if we are going to build the test executable
+if ( HAVE_MQTT )
+        message ( STATUS  "MQTT library.......: FOUND" )
+else ( HAVE_MQTT )
+        message ( STATUS  "MQTT library.......: NOT FOUND! ( please, install MQTT )" )
+endif ( HAVE_MQTT )
+
+message( STATUS "" )
+
+
+
+
+
+
+
+
+
+
+###############################################
+##           FindCLIENT cmake file             ##
+###############################################
+
+# customizing the FindMQTT.cmake file for the integration with external applications
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/FindCLIENT.cmake.in"
+  "${PROJECT_SOURCE_DIR}/cmake/FindCLIENT.cmake"
+  @ONLY
+  )
+
+# install the config file
+install( FILES "${PROJECT_SOURCE_DIR}/cmake/FindCLIENT.cmake" DESTINATION lib/cmake )
