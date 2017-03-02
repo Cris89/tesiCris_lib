@@ -36,7 +36,7 @@ list( REMOVE_DUPLICATES TESICRIS_INCLUDES )
 ## -----------------------------------------------------------------------------
 ## Check for the libraries
 
-# check for the MQTT library
+# check for the CLIENT library
 find_library( CLIENT_LIBRARIES libtesiCris_client.a libtesiCris_client.so tesiCris_client
 	PATHS ${TESICRIS_BINARY_PATH}/framework/client ${TESICRIS_INSTALL_PATH}/lib
 	NO_DEFAULT_PATH
@@ -48,18 +48,18 @@ if( NOT CLIENT_LIBRARIES )
 endif( NOT CLIENT_LIBRARIES )
 
 # check for the MQTT library
-find_library( MQTT_LIBRARIES libpaho-mqtt3a.so libpaho-mqtt3as.so lib/libpaho-mqtt3c.so libpaho-mqtt3cs.so
+find_library( MQTT_LIBRARIES lib/libpaho-mqtt3c.so
 	PATHS ${MQTT_ROOT}
 	NO_DEFAULT_PATH
 	)
 if( NOT MQTT_LIBRARIES )
-	find_library( MQTT_LIBRARIES libpaho-mqtt3a.so libpaho-mqtt3as.so lib/libpaho-mqtt3c.so libpaho-mqtt3cs.so
+	find_library( MQTT_LIBRARIES lib/libpaho-mqtt3c.so
 		PATHS /usr/local/lib /usr/lib /lib ${MQTT_ROOT}
 		)
 endif( NOT MQTT_LIBRARIES )
 
 # append the libraries
-set( TESICRIS_LIBRARIES ${MQTT_LIBRARIES} ${CLIENT_LIBRARIES} )
+set( TESICRIS_LIBRARIES ${CLIENT_LIBRARIES} ${MQTT_LIBRARIES} )
 
 list( REMOVE_DUPLICATES TESICRIS_LIBRARIES )
 

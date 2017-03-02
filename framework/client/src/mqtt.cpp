@@ -26,8 +26,6 @@ MQTT::MQTT( AppStruct &app, Topics &t )
 	appStruct = &app;
 	topics = &t;
 
-	appStruct->setStatus(AppStruct::dse);
-
 
 
 

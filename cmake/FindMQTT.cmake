@@ -1,9 +1,9 @@
-# Check for the presence of the tesiCris framework
+# Check for the presence of the MQTT framework
 #
-# The following variables are set when tesiCris is found:
-# 	HAVE_MQTT		= Set to true, if tesiCris have been found.
-# 	MQTT_INCLUDES  	= Include path for the header files of tesiCris
-# 	MQTT_LIBRARIES	= Link these to use ANTAREX
+# The following variables are set when MQTT is found:
+# 	HAVE_MQTT	= Set to true, if MQTT have been found.
+# 	MQTT_INCLUDES  	= Include path for the header files of MQTT
+# 	MQTT_LIBRARIES	= Link these to use tesiCris
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

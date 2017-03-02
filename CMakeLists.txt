@@ -41,16 +41,7 @@ option( LIB_STATIC "Build static library" ON )
 #### Dependencies check
 ################################
 
-# comando da inserirsi nell'applicazione che utilizza il framework
-
-# Load additional CMake modules
-# list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-
-# Check for CLIENT library
-
-# find_package( CLIENT )
-
-
+# Check for MQTT library
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 find_package( MQTT )
 
@@ -94,44 +85,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -Ofast -fu
 
 
 ################################
-#### Configuration section
-################################
-
-# ---- Name the framework components
-# nel momento in cui ho soltanto un modulo, non è necessario specificare il nome del modulo, essendo unico
-# set( CLIENT_LIB_NAME "tesiCris_client" )
-
-# ---- Set the include directory for the project headers
-# set( CLIENT_HDR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/framework/client/include )
-
-
-
-
-
-
-
-
-
-
-################################
 #### Build section
 ################################
 
 # building the framework
 add_subdirectory( framework )
-
-
-
-
-
-
-
-
-
-
-##########################################
-#### Install the tesiCris_client
-##########################################
-
-# install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tesiCris_client DESTINATION lib )
-# install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/tesiCris_client/lib DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
