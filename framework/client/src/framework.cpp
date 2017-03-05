@@ -3,10 +3,11 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <iostream>
 
-Framework::Framework( std::string name, std::vector<float> defaultConf, std::vector< std::string > info )
+Framework::Framework( std::string name, int numParams, int numMetrics, std::vector<float> defaultConf, std::vector< std::string > info )
 {
-	appStruct = new AppStruct( name, info, defaultConf );
+	appStruct = new AppStruct( name, numParams, numMetrics, info, defaultConf );
 
 	topics = new Topics( appStruct->getAppName(), appStruct->getHostpidStr() );
 
@@ -34,15 +35,14 @@ void Framework::init()
 	mqtt->publish( appStruct->getAppName_hostpid(), topics->getAppsTopic() );
 }
 
-std::vector<float> Framework::update()
+void Framework::checkOPs()
 {
-	int randomConf = rand() % ( appStruct->getConfigurationsList().size() );
+	changeOPs = appStruct->checkOPs();
+}
 
-	std::vector<float> configuration = appStruct->getConfigurationsList()[randomConf];
-
-	appStruct->setConfigurationsList( appStruct->getUsedConfigurations() );
-
-	return configuration;
+AppStruct *Framework::getAppStruct()
+{
+	return appStruct;
 }
 
 void Framework::sendResult( std::string op )
@@ -70,4 +70,9 @@ void Framework::manageUsedConf( std::vector<float> conf )
 	{
 		appStruct->addUsedConfiguration( conf );
 	}
+}
+
+void Framework::updateOPs()
+{
+	appStruct->updateOPs();
 }

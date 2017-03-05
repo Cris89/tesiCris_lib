@@ -1,6 +1,7 @@
 #include "tesiCris/appStruct.hpp"
 
 #include <unistd.h>
+#include <iostream>
 
 #include <cstring>
 
@@ -9,13 +10,18 @@ AppStruct::AppStruct()
 
 }
 
-AppStruct::AppStruct( std::string name, std::vector< std::string > i, std::vector<float> defaultConf )
+AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::string > i, std::vector<float> defaultConf )
 {
 	appName = name;
 	info = i;
 
+	numParams = numP;
+	numMetrics = numM;
+
+	argoOPs = new ArgoOPs();
+
 	configurationsList.push_back(defaultConf);
-	usedConfigurations.push_back(defaultConf);
+	//usedConfigurations.push_back(defaultConf);
 
 
 
@@ -89,6 +95,35 @@ void AppStruct::setStatus( appStatus s)
 std::vector< std::string > AppStruct::getInfo()
 {
 	return info;
+}
+
+ArgoOPs *AppStruct::getArgoOPs()
+{
+	return argoOPs;
+}
+
+bool AppStruct::checkOPs()
+{
+	if( configurationsList != currentConfigurations )
+	{
+		argoOPs->makeOPs( configurationsList, numParams, true);
+		argoOPs->makeOPs( currentConfigurations, numParams, false);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+std::vector< std::vector<float> > AppStruct::getCurrentConfigurations()
+{
+	return currentConfigurations;
+}
+
+void AppStruct::updateOPs()
+{
+	currentConfigurations = configurationsList;
 }
 
 std::vector< std::vector<float> > AppStruct::getUsedConfigurations()

@@ -10,15 +10,21 @@
 class Framework
 {
 public:
-	Framework( std::string name, std::vector<float> defaultConf, std::vector< std::string > info );
+	Framework( std::string name, int numParams, int numMetrics, std::vector<float> defaultConf, std::vector< std::string > info );
 
 	void init();
 
-	std::vector<float> update();
+	bool changeOPs;
+
+	AppStruct *getAppStruct();
+
+	void checkOPs();
 
 	void sendResult( std::string op );
 
 	void manageUsedConf( std::vector<float> conf );
+
+	void updateOPs();
 
 private:
 	AppStruct *appStruct;
