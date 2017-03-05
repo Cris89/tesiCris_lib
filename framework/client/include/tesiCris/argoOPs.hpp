@@ -54,16 +54,18 @@ class ArgoOPs
 public:
 	ArgoOPs();
 
-	operating_points_t getNewOPs();
 	operating_points_t getCurrentOPs();
+
+	operating_points_t getNewOPs();
 
 	void makeOPs( std::vector< std::vector<float> > ops, int numParams, bool areNew);
 
 	virtual ~ArgoOPs();
 
 private:
-	operating_points_t newOPs;
 	operating_points_t currentOPs;
+
+	operating_points_t newOPs;
 };
 
 #endif

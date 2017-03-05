@@ -16,32 +16,33 @@ public:
 	MQTT( AppStruct &app, Topics &t );
 
 	void connect();
-	void subscribe( const char *topic );
+
 	static void publish( char *payload, const char *topicName );
 
-	static AppStruct *getAppStruct();
-	static Topics *getTopics();
-
+	void subscribe( const char *topic );
+	
 	virtual ~MQTT();
 
 private:
+	static AppStruct *appStruct;
+
 	static MQTTClient client;
-	static int rc;
 
 	// clientID
 	// es.: "swaptions_crisXPS15_1897"
 	static char *clientID;
 
-	static AppStruct *appStruct;
-	static Topics *topics;
+	static MQTTClient_messageArrived messageArrived;
 
 	static std::mutex mtx;
 
-	static MQTTClient_messageArrived messageArrived;
+	static int rc;
 
 	pthread_t reqThread;
+	
+	static void *reqThreadFunc( void * );
 
-    static void *reqThreadFunc( void * );
+	static Topics *topics;
 };
 
 #endif

@@ -113,6 +113,11 @@ Topics::Topics( std::string appName, std::string hostpid )
 	lastWillTopic = lastWillTopicP;
 }
 
+const char *Topics::getAppsTopic()
+{
+	return appsTopic;
+}
+
 const char *Topics::getCommunicationTopic()
 {
 	return communicationTopic;
@@ -123,14 +128,19 @@ const char *Topics::getConfTopic()
 	return confTopic;
 }
 
+const char *Topics::getLastWillTopic()
+{
+	return lastWillTopic;
+}
+
 const char *Topics::getModelTopic()
 {
 	return modelTopic;
 }
 
-const char *Topics::getAppsTopic()
+const char *Topics::getOPsTopic()
 {
-	return appsTopic;
+	return OPsTopic;
 }
 
 const char *Topics::getReqTopic()
@@ -138,19 +148,9 @@ const char *Topics::getReqTopic()
 	return reqTopic;
 }
 
-const char *Topics::getLastWillTopic()
-{
-	return lastWillTopic;
-}
-
 const char *Topics::getSendInfoTopic()
 {
 	return sendInfoTopic;
-}
-
-const char *Topics::getOPsTopic()
-{
-	return OPsTopic;
 }
 
 Topics::~Topics()

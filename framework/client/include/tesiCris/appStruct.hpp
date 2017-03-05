@@ -15,70 +15,69 @@ public:
 
 	AppStruct();
 	AppStruct( std::string name, int numParams, int numMetrics, std::vector< std::string > i, std::vector<float> defaultConf );
-
+	
+	void addOp( std::vector<float> op );
+	
+	bool checkOPs();
+	
 	std::string getAppName();
-
-	std::string getHostpidStr();
-	char *getHostpid();
 	
 	char *getAppName_hostpid();
 	
-	appStatus getStatus();
-
 	ArgoOPs *getArgoOPs();
-
-	bool checkOPs();
 	
-	std::vector< std::vector<float> > getConfigurationsList();
-
-	std::vector< std::vector<float> > getCurrentConfigurations();
-
-	std::vector< std::vector<float> > getUsedConfigurations();
-	void addUsedConfiguration( std::vector<float> conf );
+	char *getHostpid();
+	
+	std::string getHostpidStr();
 	
 	std::vector< std::string > getInfo();
-
+	
 	std::vector< std::vector<float> > getModel();
-
-	void updateOPs();
-
-	void setStatus( appStatus s );
+	
+	appStatus getStatus();
+	
+	void manageCurrentConfs();
+	
 	void setConfigurationsList( std::vector< std::vector<float> > confsList );
-	void addOp( std::vector<float> op );
+	
+	void setStatus( appStatus s );
+	
+	void updateOPs();
 
 	virtual ~AppStruct();
 
 private:
-	appStatus status;
-
-	ArgoOPs *argoOPs;
-
-	int numParams;
-	int numMetrics;
-
 	std::string appName;
-
-	// hostname_pid
-	// es.: "crisXPS15_1897"
-	char *hostpid;
-
+	
+	ArgoOPs *argoOPs;
+	
 	// application name + hostpid
 	// es.: "swaptions crisXPS15_1897"
 	char *appName_hostpid;
-
+	
+	// hostname_pid
+	// es.: "crisXPS15_1897"
 	// double-ended queue che contiene le configurazioni con cui l'app deve essere eseguita
 	std::vector< std::vector<float> > configurationsList;
-
+	
 	// double-ended queue che contiene le configurazioni con cui l'app deve essere eseguita
 	std::vector< std::vector<float> > currentConfigurations;
 
-	// double-ended queue che contiene le configurazioni con cui l'app è stata già eseguita
-	std::vector< std::vector<float> > usedConfigurations;
-
+	char *hostpid;
+	
 	// double-ended queue che contiene il modello
+	std::vector< std::string > info;
+	
 	std::vector< std::vector<float> > model;
 
-	std::vector< std::string > info;
+	int numMetrics;
+
+	int numParams;
+	
+	appStatus status;
+
+	// double-ended queue che contiene le configurazioni con cui l'app è stata già eseguita
+	std::vector< std::vector<float> > usedConfigurations;
 };
 
 #endif

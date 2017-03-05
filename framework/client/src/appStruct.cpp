@@ -2,7 +2,6 @@
 
 #include <unistd.h>
 #include <iostream>
-
 #include <cstring>
 
 AppStruct::AppStruct()
@@ -21,7 +20,6 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 	argoOPs = new ArgoOPs();
 
 	configurationsList.push_back(defaultConf);
-	//usedConfigurations.push_back(defaultConf);
 
 
 
@@ -61,45 +59,14 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 	setStatus(defaultStatus);
 }
 
-std::string AppStruct::getAppName()
+void AppStruct::addOp( std::vector<float> op )
 {
-	return appName;
+	model.push_back(op);
 }
 
-std::string AppStruct::getHostpidStr()
+std::vector< std::vector<float> > AppStruct::getModel()
 {
-	std::string hostpidStr = hostpid;
-	return hostpidStr;
-}
-
-char *AppStruct::getHostpid()
-{
-	return hostpid;
-}
-
-char *AppStruct::getAppName_hostpid()
-{
-	return appName_hostpid;
-}
-
-AppStruct::appStatus AppStruct::getStatus()
-{
-	return status;
-}
-
-void AppStruct::setStatus( appStatus s)
-{
-	status = s;
-}
-
-std::vector< std::string > AppStruct::getInfo()
-{
-	return info;
-}
-
-ArgoOPs *AppStruct::getArgoOPs()
-{
-	return argoOPs;
+	return model;
 }
 
 bool AppStruct::checkOPs()
@@ -116,29 +83,67 @@ bool AppStruct::checkOPs()
 	}
 }
 
-std::vector< std::vector<float> > AppStruct::getCurrentConfigurations()
+std::string AppStruct::getAppName()
 {
-	return currentConfigurations;
+	return appName;
 }
 
-void AppStruct::updateOPs()
+ArgoOPs *AppStruct::getArgoOPs()
 {
-	currentConfigurations = configurationsList;
+	return argoOPs;
 }
 
-std::vector< std::vector<float> > AppStruct::getUsedConfigurations()
+char *AppStruct::getAppName_hostpid()
 {
-	return usedConfigurations;
+	return appName_hostpid;
 }
 
-void AppStruct::addUsedConfiguration( std::vector<float> conf )
+char *AppStruct::getHostpid()
 {
-	usedConfigurations.push_back( conf );
+	return hostpid;
 }
 
-std::vector< std::vector<float> > AppStruct::getConfigurationsList()
+std::string AppStruct::getHostpidStr()
 {
-	return configurationsList;
+	std::string hostpidStr = hostpid;
+	return hostpidStr;
+}
+
+std::vector< std::string > AppStruct::getInfo()
+{
+	return info;
+}
+
+AppStruct::appStatus AppStruct::getStatus()
+{
+	return status;
+}
+
+void AppStruct::manageCurrentConfs()
+{
+	bool alreadyPresent = false;
+
+	for( auto currentConf : currentConfigurations )
+	{
+		for( auto usedConf : usedConfigurations )
+		{
+			if( usedConf == currentConf )
+			{
+				alreadyPresent = true;
+				break;
+			}
+		}
+
+		if( alreadyPresent == false )
+		{
+			usedConfigurations.push_back(currentConf);
+		}
+
+		else
+		{
+			alreadyPresent = false;
+		}
+	}
 }
 
 void AppStruct::setConfigurationsList( std::vector< std::vector<float> > confsList )
@@ -146,14 +151,16 @@ void AppStruct::setConfigurationsList( std::vector< std::vector<float> > confsLi
 	configurationsList = confsList;
 }
 
-void AppStruct::addOp( std::vector<float> op )
+void AppStruct::setStatus( appStatus s)
 {
-	model.push_back(op);
+	status = s;
 }
 
-std::vector< std::vector<float> > AppStruct::getModel()
+void AppStruct::updateOPs()
 {
-	return model;
+	AppStruct::manageCurrentConfs();
+	
+	currentConfigurations = configurationsList;
 }
 
 AppStruct::~AppStruct()

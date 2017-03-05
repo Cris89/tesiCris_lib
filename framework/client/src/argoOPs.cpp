@@ -5,14 +5,14 @@ ArgoOPs::ArgoOPs()
 
 }
 
-operating_points_t ArgoOPs::getNewOPs()
-{
-	return newOPs;
-}
-
 operating_points_t ArgoOPs::getCurrentOPs()
 {
 	return currentOPs;
+}
+
+operating_points_t ArgoOPs::getNewOPs()
+{
+	return newOPs;
 }
 
 void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, bool areNew)

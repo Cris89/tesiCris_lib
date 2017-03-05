@@ -12,14 +12,16 @@
 #define QOS					0
 
 AppStruct *MQTT::appStruct;
-Topics *MQTT::topics;
+
+MQTTClient MQTT::client;
+
+char *MQTT::clientID;
 
 std::mutex MQTT::mtx;
 
-MQTTClient MQTT::client;
 int MQTT::rc;
 
-char *MQTT::clientID;
+Topics *MQTT::topics;
 
 MQTT::MQTT( AppStruct &app, Topics &t )
 {
@@ -62,34 +64,6 @@ void MQTT::connect()
 	rc = MQTTClient_connect(client, &conn_opts);
 	
 	printf( "\nclientID: %s connected at %s", clientID, ADDRESS );
-}
-
-void MQTT::publish( char *payload, const char *topicName )
-{
-	MQTTClient_message msg = MQTTClient_message_initializer;
-	
-	msg.payload = payload;
-	msg.payloadlen = strlen(payload);
-
-	msg.qos = QOS;
-
-	msg.retained = 0;
-	
-	MQTTClient_deliveryToken dt;
-
-	rc = MQTTClient_publishMessage(client, topicName, &msg, &dt);
-	rc = MQTTClient_waitForCompletion(client, dt, TIMEOUT);
-
-	printf("\n\n%s publication\ntopic: %s\npayload: %s\n", clientID, topicName, payload);
-}
-
-void MQTT::subscribe( const char *topic )
-{
-	int qos = QOS;
-
-	rc = MQTTClient_subscribe(client, topic, qos);
-	
-	printf("\n\n%s subscribed to %s", clientID, topic);
 }
 
 int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClient_message *message )
@@ -197,14 +171,23 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 	return 1;
 }
 
-AppStruct *MQTT::getAppStruct()
+void MQTT::publish( char *payload, const char *topicName )
 {
-	return appStruct;
-}
+	MQTTClient_message msg = MQTTClient_message_initializer;
+	
+	msg.payload = payload;
+	msg.payloadlen = strlen(payload);
 
-Topics *MQTT::getTopics()
-{
-	return topics;
+	msg.qos = QOS;
+
+	msg.retained = 0;
+	
+	MQTTClient_deliveryToken dt;
+
+	rc = MQTTClient_publishMessage(client, topicName, &msg, &dt);
+	rc = MQTTClient_waitForCompletion(client, dt, TIMEOUT);
+
+	printf("\n\n%s publication\ntopic: %s\npayload: %s\n", clientID, topicName, payload);
 }
 
 void *MQTT::reqThreadFunc( void * )
@@ -215,6 +198,15 @@ void *MQTT::reqThreadFunc( void * )
 
 		std::this_thread::sleep_for( std::chrono::seconds(5) );
 	}
+}
+
+void MQTT::subscribe( const char *topic )
+{
+	int qos = QOS;
+
+	rc = MQTTClient_subscribe(client, topic, qos);
+	
+	printf("\n\n%s subscribed to %s", clientID, topic);
 }
 
 MQTT::~MQTT()

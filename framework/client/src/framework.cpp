@@ -14,6 +14,16 @@ Framework::Framework( std::string name, int numParams, int numMetrics, std::vect
 	mqtt = new MQTT( *appStruct, *topics );
 }
 
+void Framework::checkOPs()
+{
+	changeOPs = appStruct->checkOPs();
+}
+
+AppStruct *Framework::getAppStruct()
+{
+	return appStruct;
+}
+
 void Framework::init()
 {
 	mqtt->connect();
@@ -35,41 +45,12 @@ void Framework::init()
 	mqtt->publish( appStruct->getAppName_hostpid(), topics->getAppsTopic() );
 }
 
-void Framework::checkOPs()
-{
-	changeOPs = appStruct->checkOPs();
-}
-
-AppStruct *Framework::getAppStruct()
-{
-	return appStruct;
-}
-
 void Framework::sendResult( std::string op )
 {
 	char* operatingPointP = new char[op.length() + 1];
 	std::strcpy(operatingPointP, op.c_str());
 
 	mqtt->publish( operatingPointP, topics->getOPsTopic() );
-}
-
-void Framework::manageUsedConf( std::vector<float> conf )
-{
-	bool alreadyPresent = false;
-
-	for( int i = 0; i < appStruct->getUsedConfigurations().size(); i++ )
-	{
-		if( conf == appStruct->getUsedConfigurations()[i] )
-		{
-			alreadyPresent = true;
-			break;
-		}
-	}
-
-	if( alreadyPresent == false )
-	{
-		appStruct->addUsedConfiguration( conf );
-	}
 }
 
 void Framework::updateOPs()

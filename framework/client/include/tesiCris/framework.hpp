@@ -10,28 +10,30 @@
 class Framework
 {
 public:
-	Framework( std::string name, int numParams, int numMetrics, std::vector<float> defaultConf, std::vector< std::string > info );
-
-	void init();
+	Framework( std::string name, 
+				int numParams, 
+				int numMetrics, 
+				std::vector<float> defaultConf, 
+				std::vector< std::string > info );
 
 	bool changeOPs;
 
-	AppStruct *getAppStruct();
-
 	void checkOPs();
-
+	
+	AppStruct *getAppStruct();
+	
+	void init();
+	
 	void sendResult( std::string op );
-
-	void manageUsedConf( std::vector<float> conf );
-
+	
 	void updateOPs();
 
 private:
 	AppStruct *appStruct;
-
-	Topics *topics;
-
+	
 	MQTT *mqtt;
+	
+	Topics *topics;
 };
 
 #endif
