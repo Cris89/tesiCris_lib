@@ -43,8 +43,6 @@ public:
 	
 	appStatus getStatus();
 	
-	void manageCurrentConfs();
-	
 	void setConfigurationsList( std::vector< std::vector<float> > confsList );
 	
 	void setStatus( appStatus s );

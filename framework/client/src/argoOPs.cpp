@@ -1,8 +1,15 @@
 #include "tesiCris/argoOPs.hpp"
 
+#include <algorithm>
+
 ArgoOPs::ArgoOPs()
 {
 
+}
+
+operating_points_t ArgoOPs::getCommonOPs()
+{
+	return commonOPs;
 }
 
 operating_points_t ArgoOPs::getCurrentOPs()
@@ -13,6 +20,25 @@ operating_points_t ArgoOPs::getCurrentOPs()
 operating_points_t ArgoOPs::getNewOPs()
 {
 	return newOPs;
+}
+
+void ArgoOPs::makeCommonOPs()
+{
+	commonOPs.clear();
+
+	for( auto currentOP : currentOPs )
+	{
+		for( auto newOP : newOPs )
+		{
+			if( newOP == currentOP )
+			{
+				commonOPs.push_back(newOP);
+				newOPs.erase( std::remove( newOPs.begin(), newOPs.end(), newOP ), newOPs.end() );
+
+				break;
+			}
+		}
+	}
 }
 
 void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, bool areNew)
