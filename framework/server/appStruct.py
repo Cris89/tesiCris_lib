@@ -35,9 +35,6 @@ class appStruct():
         
         self.hostpids = []
         
-#         # dizionario: key = hostpid, value = lista di oggetti di tipo configuration
-#         self.runningConfs = {}
-        
         # lista di oggetti di tipo configuration
         self.doneConfs = []
         
@@ -47,13 +44,16 @@ class appStruct():
         
         self.otherOPs = []
 
-        # features and metrics (in this order)
-        # es.: [ ["1 100000 5.4573 32.584"], ["1 200000 4.4573 30.584"], ["1 300000 3.4573 28.584"] ]
-        self.DoEsModel = []
+        # key: configuration, value: metrics values list
+
+        # I update this dictionary adding metric values everytime I receive them;
+        # at the end I will divide metrics values by numOPs --> 
+        # every configuration will have metrics median values 
+        self.DoEsModel = {}
         
         # features and metrics (in this order)
         # es.: [ ["1 100000 5.4573 32.584"], ["1 200000 4.4573 30.584"], ["1 300000 3.4573 28.584"] ]
-        self.model = []    
+        self.model = []
     
     
     
