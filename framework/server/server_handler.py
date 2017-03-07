@@ -387,6 +387,8 @@ class server_handler():
 
                 # notify the thread that computes the model through Spark
                 self.rsmCond.notifyAll()
+                
+                self.buildAndSendDoEsModel()
     
     def sendModel(self, hostpid):
         for op in self.struct.getModel():

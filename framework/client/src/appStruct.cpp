@@ -83,6 +83,7 @@ bool AppStruct::checkOPs()
 	{
 		argoOPs->makeOPs( configurationsList, numParams, newOPs );
 		argoOPs->makeOPs( currentConfigurations, numParams, notNewOPs );
+
 		return true;
 	}
 	else
@@ -110,6 +111,11 @@ char *AppStruct::getAppName_hostpid()
 	//std::lock_guard<std::mutex> lock(appStruct_mutex);
 
 	return appName_hostpid;
+}
+
+std::string AppStruct::getAppName()
+{
+	return appName;
 }
 
 ArgoOPs *AppStruct::getArgoOPs()
