@@ -81,8 +81,8 @@ bool AppStruct::checkOPs()
 
 	if( configurationsList != currentConfigurations )
 	{
-		argoOPs->makeOPs( configurationsList, numParams, newOPs );
-		argoOPs->makeOPs( currentConfigurations, numParams, notNewOPs );
+		argoOPs->makeOPs( configurationsList, numParams, newOPs);
+		argoOPs->makeOPs( currentConfigurations, numParams, notNewOPs);
 
 		return true;
 	}
@@ -118,10 +118,20 @@ std::string AppStruct::getAppName()
 	return appName;
 }
 
+std::string AppStruct::getAppName()
+{
+	return appName;
+}
+
 ArgoOPs *AppStruct::getArgoOPs()
 {
 	//std::lock_guard<std::mutex> lock(appStruct_mutex);
 
+	return argoOPs;
+}
+
+ArgoOPs *AppStruct::getArgoOPs()
+{
 	return argoOPs;
 }
 

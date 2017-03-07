@@ -268,7 +268,7 @@ class server_handler():
             #self.lock.acquire()
             
             self.struct.removeHostpid(msg.payload)
-            
+
             #self.lock.release()
                 
     def connect(self, host):
