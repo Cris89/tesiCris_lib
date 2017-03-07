@@ -17,8 +17,6 @@ MQTTClient MQTT::client;
 
 char *MQTT::clientID;
 
-std::mutex MQTT::mtx;
-
 int MQTT::rc;
 
 Topics *MQTT::topics;
@@ -76,40 +74,23 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 	std::string payload( (char *)message->payload, message->payloadlen );
 
 	if( topic == topics->getCommunicationTopic() )
-	{
-		mtx.lock();
-
-		if( payload == "info")
-		{	
-			for( int i = 0; i < appStruct->getInfo().size(); i++ ) 
-			{
-	    		char* message = new char[ appStruct->getInfo()[i].length() + 1 ];
-				std::strcpy( message, appStruct->getInfo()[i].c_str() );
-
-				MQTT::publish( message, topics->getSendInfoTopic() );
-			}
-
-			char done[] = "done";
-			char* doneP = done;
-			
-			MQTT::publish( doneP, topics->getSendInfoTopic() );
-		}
-
-		else if( payload == "doeDone" )
+	{	
+		for( int i = 0; i < appStruct->getInfo().size(); i++ ) 
 		{
-			// topic on which the app will request a new configuration 
-			// topic: tesiCris/swaptions/req
-			// payload es.: crisXPS15_1897
-			MQTT::publish( appStruct->getHostpid(), topics->getReqTopic() );
+    		char* message = new char[ appStruct->getInfo()[i].length() + 1 ];
+			std::strcpy( message, appStruct->getInfo()[i].c_str() );
+
+			MQTT::publish( message, topics->getSendInfoTopic() );
 		}
 
-		mtx.unlock();
+		char done[] = "done";
+		char* doneP = done;
+		
+		MQTT::publish( doneP, topics->getSendInfoTopic() );
 	}
 
 	else if( topic == topics->getConfTopic() )
 	{
-		mtx.lock();
-
 		std::stringstream ss( payload );
 		std::string token;
 
@@ -130,17 +111,14 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 		{
 			appStruct->setStatus( AppStruct::dse );
 		}
-
-		mtx.unlock();
 	}
 
 	else if( topic == topics->getModelTopic() )
 	{
-		mtx.lock();
-
 		if( payload == "modelDone")
 		{
 			appStruct->setConfigurationsList( appStruct->getModel() );
+			appStruct->clearModel();
 			appStruct->setStatus( AppStruct::autotuning );
 		}
 
@@ -161,8 +139,6 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 
 			appStruct->addOp(op);
 		}
-
-		mtx.unlock();
 	}
 
 	MQTTClient_freeMessage(&message);

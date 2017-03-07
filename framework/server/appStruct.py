@@ -46,6 +46,10 @@ class appStruct():
         self.OPsList = []
         
         self.otherOPs = []
+
+        # features and metrics (in this order)
+        # es.: [ ["1 100000 5.4573 32.584"], ["1 200000 4.4573 30.584"], ["1 300000 3.4573 28.584"] ]
+        self.DoEsModel = []
         
         # features and metrics (in this order)
         # es.: [ ["1 100000 5.4573 32.584"], ["1 200000 4.4573 30.584"], ["1 300000 3.4573 28.584"] ]

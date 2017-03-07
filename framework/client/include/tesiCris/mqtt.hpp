@@ -6,8 +6,6 @@
 
 #include <MQTTClient.h>
 
-#include <mutex>
-
 #include <pthread.h>
 
 class MQTT 
@@ -33,8 +31,6 @@ private:
 	static char *clientID;
 
 	static MQTTClient_messageArrived messageArrived;
-
-	static std::mutex mtx;
 
 	static int rc;
 

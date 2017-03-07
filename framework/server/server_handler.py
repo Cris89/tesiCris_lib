@@ -138,29 +138,33 @@ class server_handler():
         
         if( msg.topic == self.newHostpidTopic ):
             # new client (hostpid) arrived
-            self.lock.acquire()
+            #self.lock.acquire()
             
             self.manageNewHostpid(msg.payload)
             
-            self.lock.release()
+            #self.lock.release()
         
         elif( msg.topic == self.clientsReqTopic ):
             # a client (hostpid) made a request
-            self.lock.acquire()         
+            #self.lock.acquire()         
             
             if( self.struct.getStatus() == "dse" ):
                 # se ci sono configurazioni da eseguire    
                 self.sendConfiguration(msg.payload)
+
+            if( self.struct.getStatus() == "buildingTheModel" ):
+                # se il modello non e' ancora pronto    
+                self.sendDoEsModel(msg.payload)
             
             elif( self.struct.getStatus() == "autotuning" ):
                 # esiste il modello completo
                 self.sendModel(msg.payload)
             
-            self.lock.release()
+            #self.lock.release()
 
         elif( msg.topic == self.receiveInfoTopic ):
             # received app info
-            self.lock.acquire()
+            #self.lock.acquire()
             
             if( self.struct.getStatus() != "receivingInfo" ):
                 self.struct.setStatus("receivingInfo")  
@@ -216,12 +220,12 @@ class server_handler():
                     # notify the thread that computes the doeThread configurations
                     self.doeCond.notifyAll()
             
-            self.lock.release()
+            #self.lock.release()
         
         elif( msg.topic == self.OPsTopic ):
             # msg.payload es.: "1 100000:5.3454867 0.2343545"
             
-            self.lock.acquire()
+            #self.lock.acquire()
             
             splitted = msg.payload.split(":")
             # splitted[0]: configuration
@@ -257,20 +261,15 @@ class server_handler():
             if( newOP == False ):
                 self.struct.addOtherOP(msg.payload)
             
-            self.lock.release()
+            #self.lock.release()
         
         elif( msg.topic == self.disconnectionTopic ):
             # a client (hostpid) has disconnected
-            self.lock.acquire()
+            #self.lock.acquire()
             
             self.struct.removeHostpid(msg.payload)
             
-#             self.struct.restoreConfs(msg.payload, True)
-            
-#             print( "\n" + msg.payload + " disconnected" )
-#             print( "configurations restored" )
-            
-            self.lock.release()
+            #self.lock.release()
                 
     def connect(self, host):
         self.client.connect(host, port = 8883)
@@ -367,9 +366,6 @@ class server_handler():
             configuration = self.struct.getDoeConfs().pop(0)
             self.struct.addDoeConf(configuration)
             
-#             # aggiungo la configurazione che sto per inviare all'hostpid tra quelle in esecuzione
-#             self.struct.addConfToRunningConfs(hostpid, configuration)
-            
             confStr = ""
             for value in configuration.getConf():
                 confStr += str(value) + " "
@@ -386,6 +382,9 @@ class server_handler():
     def checkStartRsm(self):
         with self.rsmCond:
             if( len(self.struct.getDoneConfs()) == self.struct.getDoeConfsNumber() ):
+                # partial model with only DoEs configurations
+                self.buildDoEsModel()
+
                 # notify the thread that computes the model through Spark
                 self.rsmCond.notifyAll()
     
@@ -407,4 +406,12 @@ class server_handler():
                     model.append( str(op) )
         
         self.struct.setModel(model)
-        
+
+    def buildDoEsModel( self ):
+        pass
+        #dall'Oplist genero un modelo parziale con le configurazioni del DoEs e la media delle metriche
+        #e lo invio ai client che fanno req
+
+    def sendDoEsModel( self, hostpid ):
+        pass
+        #invio il modello parziale generato da buildDoEsModel()

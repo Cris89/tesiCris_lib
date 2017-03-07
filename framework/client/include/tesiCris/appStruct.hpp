@@ -5,7 +5,7 @@
 
 #include <vector>
 #include <deque>
-
+#include <mutex>
 #include <string>
 
 class AppStruct
@@ -13,12 +13,19 @@ class AppStruct
 public:
 	enum appStatus{ defaultStatus, dse, autotuning };
 
+	enum OPsType : bool {
+    newOPs = true,
+    notNewOPs = false,
+	};
+
 	AppStruct();
 	AppStruct( std::string name, int numParams, int numMetrics, std::vector< std::string > i, std::vector<float> defaultConf );
 	
 	void addOp( std::vector<float> op );
 	
 	bool checkOPs();
+
+	void clearModel();
 	
 	std::string getAppName();
 	
@@ -47,7 +54,11 @@ public:
 	virtual ~AppStruct();
 
 private:
+	std::mutex appStruct_mutex;
+
 	std::string appName;
+
+	bool areNewOPs;
 	
 	ArgoOPs *argoOPs;
 	
@@ -73,7 +84,7 @@ private:
 	int numMetrics;
 
 	int numParams;
-	
+
 	appStatus status;
 
 	// double-ended queue che contiene le configurazioni con cui l'app è stata già eseguita

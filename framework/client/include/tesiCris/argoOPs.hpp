@@ -66,6 +66,8 @@ private:
 	operating_points_t currentOPs;
 
 	operating_points_t newOPs;
+
+	operating_points_t commonOPs;
 };
 
 #endif
