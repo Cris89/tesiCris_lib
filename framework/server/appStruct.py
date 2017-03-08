@@ -44,15 +44,21 @@ class appStruct():
         
         self.otherOPs = []
 
-        # key: configuration, value: metrics values list
+        # key: configuration, values: metrics values list
+        # key es.: "1 100000"
+        # values es.: [5.123, 126.45768]
 
         # I update this dictionary adding metric values everytime I receive them;
         # at the end I will divide metrics values by numOPs --> 
-        # every configuration will have metrics median values 
+        # every configuration will have metrics mean values 
         self.DoEsModel = {}
+
+        # String version of DoEsModel
+        # es.: [ ["1 100000 5.4573 32.584"], ["8 500000 4.4573 30.584"], ... ]
+        self.DoEsModelString = []
         
         # features and metrics (in this order)
-        # es.: [ ["1 100000 5.4573 32.584"], ["1 200000 4.4573 30.584"], ["1 300000 3.4573 28.584"] ]
+        # es.: [ ["1 100000:5.4573 32.584"], ["1 200000:4.4573 30.584"], ["1 300000:3.4573 28.584"], ... ]
         self.model = []
     
     
@@ -81,11 +87,51 @@ class appStruct():
     
     def getDoeKind(self):
         return self.doeKind
+
+
+
+
+
+    def getDoEsModel(self):
+        return self.DoEsModel
+
+    def getDoEsModelKeyValues(self, key):
+        return self.DoEsModel[key]
+
+    def setDoEsModelKeyValues(self, key, values):
+        self.DoEsModel[key] = values
+
+    def HasDoEsModelKey(self, key):
+        if( self.DoEsModel.has_key(key) ):
+            return True
+
+        else:
+            return False
+
+    def DoEsModelMeans(self):
+        print( "\n##################################################" )
+
+        print( "\nDoEsModel:" )
+
+        for key, values in self.DoEsModel.iteritems():
+            opString = key
+            # opString es.: "1 100000"
+
+            for i in range( len(values) ):
+                values[i] /= float( self.numOPs )
+
+                opString += " " + str( values[i] )
+
+            print( opString )
+
+            self.DoEsModelString.append(opString)
+
+        print( "\n##################################################" )
+
+
     
     
-    
-    
-    
+        
     def getRsmKind(self):
         return self.rsmKind
     
@@ -145,6 +191,7 @@ class appStruct():
     
     
     
+
     def getDoeConfs(self):
         return self.doeConfs
     
@@ -166,36 +213,11 @@ class appStruct():
     
     def removeConfToDoeConfs(self, conf):
         self.doeConfs.remove(conf)
-        
-        
-        
-        
-    
-#     def getRunningConfs(self):
-#         return self.runningConfs
-#     
-#     def addHostpidToRunningConfs(self, hostpid):
-#         self.runningConfs[hostpid] = []
-#     
-#     def addConfToRunningConfs(self, hostpid, conf):
-#         self.runningConfs[hostpid].append(conf)
-#     
-#     def removeConfToRunningConfs(self, hostpid, conf):
-#         self.runningConfs[hostpid].remove(conf)
-#         
-#     def restoreConfs(self, hostpid, disconnection):
-#         for conf in self.runningConfs[hostpid]:
-#             self.addDoeConf(conf)
-#         
-#         del self.runningConfs[hostpid][:]
-#         
-#         if( disconnection == True ):
-#             del self.runningConfs[hostpid]
     
     
     
     
-    
+
     def getSparkGenLinearRegrTransforms(self):
         return self.sparkGenLinearRegrTransforms
     
@@ -257,41 +279,32 @@ class appStruct():
         print( "\nappStruct" )
         
         print( "\nname:" )
-        print self.name
+        print( self.name )
         
         print( "\nstatus:" )
-        print self.status
+        print( self.status )
         
         print( "\nparameters:" )
-        print self.params
-        print self.paramsValues
+        print( self.params )
+        print( self.paramsValues )
         
         print( "\nmetrics:" )
-        print self.metrics
+        print( self.metrics )
         
         print( "\ndoe: " + self.doeKind )
         print( "numOPs: " + str( self.numOPs ) )
         
         print( "\nsparkGenLinearRegrTransforms:" )
-        print self.sparkGenLinearRegrTransforms
+        print( self.sparkGenLinearRegrTransforms )
         
         print( "\nhostpids:" )
-        print self.hostpids
+        print( self.hostpids )
         
         print( "\ndoeConfs:" )
         for confObj in self.doeConfs:
             for value in confObj.getConf():
                 print value,
             print( " [remaining OPs: " + str( confObj.getNumOPs() ) + "]" )
-        
-#         print( "\nrunningConfs:" )
-#         for key, confs in self.runningConfs.iteritems():
-#             print( "\nhostpid: " + key )
-#             
-#             for confObj in confs:
-#                 for value in confObj.getConf():
-#                     print value,
-#                 print
         
         print( "\n\ndoneConfs:" )
         for confObj in self.doneConfs:
@@ -306,7 +319,7 @@ class appStruct():
 #         print( "\nOtherOPs:" )
 #         for op in self.otherOPs:
 #             print op
-        
+
         print( "\nmodel:" )
         for op in self.model:
             print op

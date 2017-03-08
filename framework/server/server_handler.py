@@ -245,6 +245,8 @@ class server_handler():
                     newOP = True
                     
                     self.struct.addOP(msg.payload)
+
+                    self.manageConfForDoEsModel(splitted)
                     
                     conf.decrementNumOPs()
                     
@@ -257,6 +259,8 @@ class server_handler():
                         self.struct.showStruct()
                         
                         self.checkStartRsm()
+
+                    break
             
             if( newOP == False ):
                 self.struct.addOtherOP(msg.payload)
@@ -382,8 +386,7 @@ class server_handler():
     def checkStartRsm(self):
         with self.rsmCond:
             if( len(self.struct.getDoneConfs()) == self.struct.getDoeConfsNumber() ):
-                # partial model with only DoEs configurations
-                self.buildDoEsModel()
+                self.struct.DoEsModelMeans()
 
                 # notify the thread that computes the model through Spark
                 self.rsmCond.notifyAll()
@@ -407,11 +410,30 @@ class server_handler():
         
         self.struct.setModel(model)
 
-    def buildDoEsModel( self ):
-        pass
-        #dall'Oplist genero un modelo parziale con le configurazioni del DoEs e la media delle metriche
-        #e lo invio ai client che fanno req
+    def manageConfForDoEsModel( self, splittedOP ):
+        # splittedOP is a list of strings
+        # splittedOP[0]: parameters, es.: "1 100000"
+        # splittedOP[1]: metrics, es.: "5.2341 126.2"
+
+        splittedOPMetrics = splittedOP[1].split(" ")
+        metricsValues = []
+
+        for metr in splittedOPMetrics:
+            metricsValues.append( float(metr) )
+
+        if( self.struct.HasDoEsModelKey(splittedOP[0]) == True ):
+            values = struct.getDoEsModelKeyValues( splittedOP[0] )
+
+            for i in range( len(values) ):
+                values[i] += metricsValues[i]
+
+            self.struct.setDoEsModelKeyValues( splittedOP[0], values )
+
+        else:
+            self.struct.setDoEsModelKeyValues( splittedOP[0], metricsValues )
 
     def sendDoEsModel( self, hostpid ):
-        pass
-        #invio il modello parziale generato da buildDoEsModel()
+        for op in self.struct.getDoEsModel():
+            self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", op )
+        
+        self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "modelDone")
