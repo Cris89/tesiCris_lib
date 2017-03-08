@@ -422,7 +422,7 @@ class server_handler():
             metricsValues.append( float(metr) )
 
         if( self.struct.HasDoEsModelKey(splittedOP[0]) == True ):
-            values = struct.getDoEsModelKeyValues( splittedOP[0] )
+            values = self.struct.getDoEsModelKeyValues( splittedOP[0] )
 
             for i in range( len(values) ):
                 values[i] += metricsValues[i]
@@ -433,7 +433,7 @@ class server_handler():
             self.struct.setDoEsModelKeyValues( splittedOP[0], metricsValues )
 
     def sendDoEsModel( self, hostpid ):
-        for op in self.struct.getDoEsModel():
+        for op in self.struct.getDoEsModelString():
             self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", op )
         
-        self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "modelDone")
+        self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "DoEsModelDone")

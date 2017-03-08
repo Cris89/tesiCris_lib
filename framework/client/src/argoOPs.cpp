@@ -30,7 +30,7 @@ void ArgoOPs::makeCommonOPs()
 	{
 		for( auto newOP : newOPs )
 		{
-			if( newOP == currentOP )
+			if( newOP.first == currentOP.first )
 			{
 				commonOPs.push_back(newOP);
 				newOPs.erase( std::remove( newOPs.begin(), newOPs.end(), newOP ), newOPs.end() );

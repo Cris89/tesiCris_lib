@@ -92,9 +92,6 @@ class appStruct():
 
 
 
-    def getDoEsModel(self):
-        return self.DoEsModel
-
     def getDoEsModelKeyValues(self, key):
         return self.DoEsModel[key]
 
@@ -127,6 +124,13 @@ class appStruct():
             self.DoEsModelString.append(opString)
 
         print( "\n##################################################" )
+
+
+
+
+
+    def getDoEsModelString(self):
+        return self.DoEsModelString
 
 
     

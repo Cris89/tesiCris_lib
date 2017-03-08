@@ -115,7 +115,13 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 
 	else if( topic == topics->getModelTopic() )
 	{
-		if( payload == "modelDone")
+		if( payload == "DoEsModelDone")
+		{
+			appStruct->setConfigurationsList( appStruct->getModel() );
+			appStruct->clearModel();
+		}
+
+		else if ( payload == "modelDone")
 		{
 			appStruct->setConfigurationsList( appStruct->getModel() );
 			appStruct->clearModel();
