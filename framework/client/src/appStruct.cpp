@@ -21,6 +21,8 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 
 	configurationsList.push_back(defaultConf);
 
+	AppStruct::updateOPs();
+
 	argoOPs->makeOPs(configurationsList, numParams, newOPs);
 
 
