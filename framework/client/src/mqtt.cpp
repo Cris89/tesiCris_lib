@@ -61,14 +61,14 @@ void MQTT::connect()
 	
 	rc = MQTTClient_connect(client, &conn_opts);
 	
-	//printf( "\nclientID: %s connected at %s", clientID, ADDRESS );
+	printf( "\nclientID: %s connected at %s", clientID, ADDRESS );
 }
 
 int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClient_message *message )
 {
-	/*printf( "\n\nmessage arrived\n" );
+	printf( "\n\nmessage arrived\n" );
 	printf( "topic: %s\n", topicName );
-	printf( "message: %.*s", message->payloadlen, (char *)message->payload );*/
+	printf( "message: %.*s", message->payloadlen, (char *)message->payload );
 
 	std::string topic = topicName;
 	std::string payload( (char *)message->payload, message->payloadlen );
@@ -169,7 +169,7 @@ void MQTT::publish( char *payload, const char *topicName )
 	rc = MQTTClient_publishMessage(client, topicName, &msg, &dt);
 	rc = MQTTClient_waitForCompletion(client, dt, TIMEOUT);
 
-	//printf("\n\n%s publication\ntopic: %s\npayload: %s\n", clientID, topicName, payload);
+	printf("\n\n%s publication\ntopic: %s\npayload: %s\n", clientID, topicName, payload);
 }
 
 void *MQTT::reqThreadFunc( void * )
@@ -188,7 +188,7 @@ void MQTT::subscribe( const char *topic )
 
 	rc = MQTTClient_subscribe(client, topic, qos);
 	
-	//printf("\n\n%s subscribed to %s", clientID, topic);
+	printf("\n\n%s subscribed to %s", clientID, topic);
 }
 
 MQTT::~MQTT()

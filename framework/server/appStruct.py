@@ -7,6 +7,9 @@ class appStruct():
         '''
         self.name = appName
         self.status = "unknown"
+
+        # hostpid that sends app info to the server
+        self.infoHostpid = ""
         
         # default doe
         self.doeKind = "fcccd"
@@ -31,7 +34,7 @@ class appStruct():
         
         # lista di oggetti di tipo configuration
         self.doeConfs = []
-        self.doeConfsNumber= 0
+        self.doeConfsNumber = 0
         
         self.hostpids = []
         
@@ -87,6 +90,16 @@ class appStruct():
     
     def getDoeKind(self):
         return self.doeKind
+
+
+
+
+
+    def getInfoHostpid(self):
+        return self.infoHostpid
+
+    def setInfoHostpid(self, hostpid):
+        self.infoHostpid = hostpid
 
 
 
@@ -267,6 +280,21 @@ class appStruct():
         
     def getModel(self):
         return self.model
+
+
+
+
+
+    def refreshStruct(self):
+        self.status = "unknown"
+        self.infoHostpid = ""
+        self.doeKind = "fcccd"
+        self.numOPs = 1
+        self.rsmKind = "sparkGenLinRegr"
+        self.sparkGenLinearRegrTransforms.clear()
+        self.params = []
+        self.paramsValues = []
+        self.metrics = []
     
     
     

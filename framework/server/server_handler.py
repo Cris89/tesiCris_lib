@@ -102,6 +102,7 @@ class server_handler():
         self.clientsReqTopic = None
         self.communicationTopic = None
         self.receiveInfoTopic = None
+        self.receiveInfoTopic_NoMultiLevel = None
         self.OPsTopic = None
         self.doneConfTopic = None
         self.disconnectionTopic = None
@@ -146,79 +147,88 @@ class server_handler():
         
         elif( msg.topic == self.clientsReqTopic ):
             # a client (hostpid) made a request
-            #self.lock.acquire()         
+            #self.lock.acquire()
+
+            if( self.struct.getStatus() == "unknown" ):
+                # se non conosco nulla dell'applicazione
+                self.requestAppInfo()        
             
             if( self.struct.getStatus() == "dse" ):
                 # se ci sono configurazioni da eseguire    
                 self.sendConfiguration(msg.payload)
 
-            if( self.struct.getStatus() == "buildingTheModel" ):
+            elif( self.struct.getStatus() == "buildingTheModel" ):
                 # se il modello non e' ancora pronto    
                 self.sendDoEsModel(msg.payload)
             
             elif( self.struct.getStatus() == "autotuning" ):
-                # esiste il modello completo
+                # se esiste il modello completo
                 self.sendModel(msg.payload)
             
             #self.lock.release()
 
-        elif( msg.topic == self.receiveInfoTopic ):
+        elif( self.receiveInfoTopic_NoMultiLevel in msg.topic ):
             # received app info
             #self.lock.acquire()
+
+            splittedTopic = msg.topic.split("/")
+            senderHostpid = splittedTopic[-1]
             
-            if( self.struct.getStatus() != "receivingInfo" ):
-                self.struct.setStatus("receivingInfo")  
-            
-            with self.doeCond:
-                splitted = msg.payload.split(" ")
-                
-                if( splitted[0] == "metric" ):
-                    self.struct.addMetric( splitted[1] )
+            if( self.struct.getStatus() == "unknown" ):
+                self.struct.setStatus("receivingInfo")
+                self.struct.setInfoHostpid(senderHostpid)
+
+            if( senderHostpid == self.struct.getInfoHostpid() ):
+                with self.doeCond:
+                    splitted = msg.payload.split(" ")
                     
-                elif( splitted[0] == "param" ):
-                    self.struct.addParam( splitted[1] )
-                    
-                    values = []
-                    
-                    if( splitted[2] == "range" ):
-                        value = float( splitted[3] )
-                        MAXvalue = float( splitted[4] )
-                        step = float( splitted[5] )
-                     
-                        while(value <= MAXvalue):
-                            values.append(value)
-                            value += step
+                    if( splitted[0] == "metric" ):
+                        self.struct.addMetric( splitted[1] )
                         
-                        self.struct.addParamValues(values)
-                    
-                    elif( splitted[2] == "enum" ):
-                        for i in range(3, len(splitted) ):
-                            values.append( float(splitted[i]) )
+                    elif( splitted[0] == "param" ):
+                        self.struct.addParam( splitted[1] )
                         
-                        self.struct.addParamValues(values)
+                        values = []
+                        
+                        if( splitted[2] == "range" ):
+                            value = float( splitted[3] )
+                            MAXvalue = float( splitted[4] )
+                            step = float( splitted[5] )
                          
-                elif( splitted[0] == "doe" ):
-                    self.struct.setDoeKind( splitted[1] )
-                
-                elif( splitted[0] == "numOPs" ):
-                    self.struct.setNumOPs( int( splitted[1] ) )
+                            while(value <= MAXvalue):
+                                values.append(value)
+                                value += step
+                            
+                            self.struct.addParamValues(values)
+                        
+                        elif( splitted[2] == "enum" ):
+                            for i in range(3, len(splitted) ):
+                                values.append( float(splitted[i]) )
+                            
+                            self.struct.addParamValues(values)
+                             
+                    elif( splitted[0] == "doe" ):
+                        self.struct.setDoeKind( splitted[1] )
                     
-                elif( splitted[0] == "rsm" ):
-                    self.struct.setRsmKind( splitted[1] )
-                
-                elif( splitted[0] == "sparkGenLinearRegrTransforms" ):
-                    self.struct.addMetricToSparkGenLinearRegrTransforms( splitted[1] )
+                    elif( splitted[0] == "numOPs" ):
+                        self.struct.setNumOPs( int( splitted[1] ) )
+                        
+                    elif( splitted[0] == "rsm" ):
+                        self.struct.setRsmKind( splitted[1] )
                     
-                    self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[2] )
-                    self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[3] )
-                    self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[4] )
-                    self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[5] )
-                
-                elif( splitted[0] == "done" ):
-                    self.struct.setStatus("buildingDoe")
+                    elif( splitted[0] == "sparkGenLinearRegrTransforms" ):
+                        self.struct.addMetricToSparkGenLinearRegrTransforms( splitted[1] )
+                        
+                        self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[2] )
+                        self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[3] )
+                        self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[4] )
+                        self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[5] )
                     
-                    # notify the thread that computes the doeThread configurations
-                    self.doeCond.notifyAll()
+                    elif( splitted[0] == "done" ):
+                        self.struct.setStatus("buildingDoe")
+                        
+                        # notify the thread that computes the doeThread configurations
+                        self.doeCond.notifyAll()
             
             #self.lock.release()
         
@@ -273,6 +283,11 @@ class server_handler():
             
             self.struct.removeHostpid(msg.payload)
 
+            if( self.struct.getStatus() == "receivingInfo" and self.struct.getInfoHostpid() == msg.payload ):
+                self.struct.refreshStruct()
+
+                self.requestAppInfo()
+
             #self.lock.release()
                 
     def connect(self, host):
@@ -316,16 +331,11 @@ class server_handler():
             self.secondSubscriptions()
             
             self.threadsCreation()
-            
-            self.requestAppInfo()
         
         self.client.loop_forever()
     
     def manageNewHostpid(self, hostpid):
         self.struct.addHostpid(hostpid)
-        
-        if( self.struct.getStatus() == "dse"):
-            self.sendConfiguration(hostpid)
     
     def firstSubscriptions(self):
         self.newHostpidTopic = self.tesiCris + self.struct.getName() + "/newHostpid"
@@ -338,7 +348,8 @@ class server_handler():
         self.subscribe(self.disconnectionTopic)
         
     def secondSubscriptions(self):
-        self.receiveInfoTopic = self.tesiCris + self.struct.getName() + "/info"
+        self.receiveInfoTopic_NoMultiLevel = self.tesiCris + self.struct.getName() + "/info"
+        self.receiveInfoTopic = self.receiveInfoTopic_NoMultiLevel + "/#"
         self.subscribe(self.receiveInfoTopic)
         
         self.OPsTopic = self.tesiCris + self.struct.getName() + "/OPs"

@@ -40,7 +40,7 @@ Topics::Topics( std::string appName, std::string hostpid )
 
 	// topic on which the app will eventually publish app info
 	// es.: "tesiCris/swaptions/info"
-	std::string sendInfoTopicStr = ROOT + appName + "/info";
+	std::string sendInfoTopicStr = ROOT + appName + "/info/" + hostpid;
 
 	char *sendInfoTopicP = new char[sendInfoTopicStr.length() + 1];
 	std::strcpy( sendInfoTopicP, sendInfoTopicStr.c_str() );
