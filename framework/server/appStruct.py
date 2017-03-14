@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 class appStruct():
-    def __init__(self, appName):
+    def __init__( self, appName ):
         '''
         Constructor
         '''
@@ -68,50 +68,50 @@ class appStruct():
     
     
     
-    def getName(self):
+    def getName( self ):
         return self.name
     
     
     
     
     
-    def getStatus(self):
+    def getStatus( self ):
         return self.status
     
-    def setStatus(self, stat):
+    def setStatus( self, stat ):
         self.status = stat
         
         
         
         
         
-    def setDoeKind(self, k):
+    def setDoeKind( self, k ):
         self.doeKind = k
     
-    def getDoeKind(self):
+    def getDoeKind( self ):
         return self.doeKind
 
 
 
 
 
-    def getInfoHostpid(self):
+    def getInfoHostpid( self ):
         return self.infoHostpid
 
-    def setInfoHostpid(self, hostpid):
+    def setInfoHostpid( self, hostpid ):
         self.infoHostpid = hostpid
 
 
 
 
 
-    def getDoEsModelKeyValues(self, key):
+    def getDoEsModelKeyValues( self, key ):
         return self.DoEsModel[key]
 
-    def setDoEsModelKeyValues(self, key, values):
+    def setDoEsModelKeyValues( self, key, values ):
         self.DoEsModel[key] = values
 
-    def HasDoEsModelKey(self, key):
+    def HasDoEsModelKey( self, key ):
         if( self.DoEsModel.has_key(key) ):
             return True
 
@@ -134,7 +134,7 @@ class appStruct():
 
             print( opString )
 
-            self.DoEsModelString.append(opString)
+            self.DoEsModelString.append( opString )
 
         print( "\n##################################################" )
 
@@ -142,150 +142,150 @@ class appStruct():
 
 
 
-    def getDoEsModelString(self):
+    def getDoEsModelString( self ):
         return self.DoEsModelString
 
 
     
     
         
-    def getRsmKind(self):
+    def getRsmKind( self ):
         return self.rsmKind
     
-    def setRsmKind(self, rsm):
+    def setRsmKind( self, rsm ):
         self.rsmKind = rsm
     
     
     
     
     
-    def addHostpid(self, hostpid):
-        self.hostpids.append(hostpid)
+    def addHostpid( self, hostpid ):
+        self.hostpids.append( hostpid )
     
-    def removeHostpid(self, hostpid):
-        self.hostpids.remove(hostpid)
+    def removeHostpid( self, hostpid ):
+        self.hostpids.remove( hostpid )
         
         
         
         
         
-    def setNumOPs(self, num):
+    def setNumOPs( self, num ):
         self.numOPs = num
     
-    def getNumOPs(self):
+    def getNumOPs( self ):
         return self.numOPs
        
         
         
         
     
-    def getParams(self):
+    def getParams( self ):
         return self.params
     
-    def addParam(self, param):
-        self.params.append(param)
+    def addParam( self, param ):
+        self.params.append( param )
         
         
         
         
         
-    def addMetric(self, metric):
-        self.metrics.append(metric)
+    def addMetric( self, metric ):
+        self.metrics.append( metric )
     
-    def getMetrics(self):
+    def getMetrics( self ):
         return self.metrics
     
     
     
     
     
-    def getParamsValues(self):
+    def getParamsValues( self ):
         return self.paramsValues
     
-    def addParamValues(self, values):
-        self.paramsValues.append(values)
+    def addParamValues( self, values ):
+        self.paramsValues.append( values )
     
     
     
     
 
-    def getDoeConfs(self):
+    def getDoeConfs( self ):
         return self.doeConfs
     
-    def setDoeConfs(self, confs):
+    def setDoeConfs( self, confs ):
         self.doeConfs = confs
     
-    def addDoeConf(self, conf):
-        self.doeConfs.append(conf)
+    def addDoeConf( self, conf ):
+        self.doeConfs.append( conf )
         
         
         
         
     
-    def getDoeConfsNumber(self):
+    def getDoeConfsNumber( self ):
         return self.doeConfsNumber
     
-    def setDoeConfsNumber(self, num):
+    def setDoeConfsNumber( self, num ):
         self.doeConfsNumber = num
     
-    def removeConfToDoeConfs(self, conf):
-        self.doeConfs.remove(conf)
+    def removeConfToDoeConfs( self, conf ):
+        self.doeConfs.remove( conf )
     
     
     
     
 
-    def getSparkGenLinearRegrTransforms(self):
+    def getSparkGenLinearRegrTransforms( self ):
         return self.sparkGenLinearRegrTransforms
     
-    def addMetricToSparkGenLinearRegrTransforms(self, metric):
+    def addMetricToSparkGenLinearRegrTransforms( self, metric ):
         self.sparkGenLinearRegrTransforms[metric] = []
     
-    def addMetricInfoToSparkGenLinearRegrTransforms(self, metric, info):
-        self.sparkGenLinearRegrTransforms[metric].append(info)
+    def addMetricInfoToSparkGenLinearRegrTransforms( self, metric, info ):
+        self.sparkGenLinearRegrTransforms[metric].append( info )
             
             
        
             
             
-    def addConfToDoneConfs(self, conf):
-        self.doneConfs.append(conf)
+    def addConfToDoneConfs( self, conf ):
+        self.doneConfs.append( conf )
         
-    def getDoneConfs(self):
+    def getDoneConfs( self ):
         return self.doneConfs
     
     
     
     
     
-    def addOP(self, op):
-        self.OPsList.append(op)
+    def addOP( self, op ):
+        self.OPsList.append( op )
     
-    def getOPsList(self):
+    def getOPsList( self ):
         return self.OPsList
     
     
     
     
     
-    def addOtherOP(self, op):
-        self.otherOPs.append(op)
+    def addOtherOP( self, op ):
+        self.otherOPs.append( op )
     
     
     
     
     
-    def setModel(self, model):
+    def setModel( self, model ):
         self.model = model
         
-    def getModel(self):
+    def getModel( self ):
         return self.model
 
 
 
 
 
-    def refreshStruct(self):
+    def refreshStruct( self ):
         self.status = "unknown"
         self.infoHostpid = ""
         self.doeKind = "fcccd"
@@ -305,13 +305,16 @@ class appStruct():
     
     
     
-    def showStruct(self):
+    def showStruct( self ):
         print( "\n##################################################" )
         
         print( "\nappStruct" )
         
         print( "\nname:" )
         print( self.name )
+
+        print( "\ninfoHostpid:" )
+        print( self.infoHostpid )
         
         print( "\nstatus:" )
         print( self.status )
@@ -325,6 +328,8 @@ class appStruct():
         
         print( "\ndoe: " + self.doeKind )
         print( "numOPs: " + str( self.numOPs ) )
+
+        print( "\nrsm: " + self.rsmKind )
         
         print( "\nsparkGenLinearRegrTransforms:" )
         print( self.sparkGenLinearRegrTransforms )
@@ -347,10 +352,14 @@ class appStruct():
         print( "\nOPsList:" )
         for op in self.OPsList:
             print op
-        
-#         print( "\nOtherOPs:" )
-#         for op in self.otherOPs:
-#             print op
+
+        print( "otherOPs:" )
+        for op in self.otherOPs:
+            print op
+
+        print( "\nDoEModel:" )
+        for op in self.DoEsModelString:
+            print op
 
         print( "\nmodel:" )
         for op in self.model:

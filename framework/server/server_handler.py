@@ -1,14 +1,10 @@
-import os
-import csv
-
-import threading
-
-import paho.mqtt.client as paho
-
 from appStruct import appStruct
-
+import csv
 from doe import doe
+import os
+import paho.mqtt.client as paho
 from rsm import rsm
+import threading
 
 
 ####################################################################################################
@@ -87,11 +83,13 @@ class rsmThread( threading.Thread ):
 
 class server_handler():
 
-    def __init__(self):
+    def __init__( self ):
         '''
         constructor
         '''
-        self.address = "127.0.0.1"
+        self.IPaddress = "127.0.0.1"
+        self.brokerPort = "8883"
+
         self.clientID = "server_handler"
         self.qos = 0
         
@@ -104,7 +102,6 @@ class server_handler():
         self.receiveInfoTopic = None
         self.receiveInfoTopic_NoMultiLevel = None
         self.OPsTopic = None
-        self.doneConfTopic = None
         self.disconnectionTopic = None
         
         self.struct = None
@@ -115,68 +112,69 @@ class server_handler():
         self.thread_doe = None
         self.thread_rsm = None
         
-        self.lock = threading.Lock()
-        
         self.doeCond = None
         self.rsmCond = None
+
+        self.DoEModelSent = []
     
     
     ####################################################################################################
     # MQTT
     ####################################################################################################
     
-    def on_connect(self, host):
-        print("\nclient ID: " + self.client._client_id + " connected at " + host + ":8883")
+    def on_connect( self, IPaddress, brokerPort ):
+        print( "\nclient ID: " + self.client._client_id + " connected at " + IPaddress + ":" + brokerPort )
     
-    def on_subscribe(self, topic):
-            print ("\nsubscription")
-            print ("topic: " + topic)
+    def on_subscribe( self, topic ):
+            print( "\nsubscription" )
+            print( "topic: " + topic )
      
-    def on_message(self, client, userdata, msg):
-        print ("\nreceived message")
-        print ("topic: " + msg.topic)
-        print ("payload: " + msg.payload)
+    def on_message( self, client, userdata, msg ):
+        print( "\nreceived message" )
+        print( "topic: " + msg.topic )
+        print( "payload: " + msg.payload )
         
         if( msg.topic == self.newHostpidTopic ):
             # new client (hostpid) arrived
-            #self.lock.acquire()
-            
-            self.manageNewHostpid(msg.payload)
-            
-            #self.lock.release()
+            self.manageNewHostpid( msg.payload )
         
         elif( msg.topic == self.clientsReqTopic ):
             # a client (hostpid) made a request
-            #self.lock.acquire()
-
             if( self.struct.getStatus() == "unknown" ):
                 # se non conosco nulla dell'applicazione
                 self.requestAppInfo()        
             
             if( self.struct.getStatus() == "dse" ):
                 # se ci sono configurazioni da eseguire    
-                self.sendConfiguration(msg.payload)
+                self.sendConfiguration( msg.payload )
 
             elif( self.struct.getStatus() == "buildingTheModel" ):
                 # se il modello non e' ancora pronto    
-                self.sendDoEsModel(msg.payload)
+                self.sendDoEsModel( msg.payload )
             
             elif( self.struct.getStatus() == "autotuning" ):
                 # se esiste il modello completo
-                self.sendModel(msg.payload)
-            
-            #self.lock.release()
+                self.sendModel( msg.payload )
+
+        elif( msg.topic == self.disconnectionTopic ):
+            # a client (hostpid) has disconnected
+            self.struct.removeHostpid( msg.payload )
+
+            if( self.struct.getStatus() == "receivingInfo" and self.struct.getInfoHostpid() == msg.payload ):
+                self.struct.refreshStruct()
+
+                self.requestAppInfo()
 
         elif( self.receiveInfoTopic_NoMultiLevel in msg.topic ):
             # received app info
-            #self.lock.acquire()
 
+            #topic es.: "tesiCris/swaptions/info/crisXPS15_1897"
             splittedTopic = msg.topic.split("/")
             senderHostpid = splittedTopic[-1]
             
             if( self.struct.getStatus() == "unknown" ):
-                self.struct.setStatus("receivingInfo")
-                self.struct.setInfoHostpid(senderHostpid)
+                self.struct.setStatus( "receivingInfo" )
+                self.struct.setInfoHostpid( senderHostpid )
 
             if( senderHostpid == self.struct.getInfoHostpid() ):
                 with self.doeCond:
@@ -195,17 +193,17 @@ class server_handler():
                             MAXvalue = float( splitted[4] )
                             step = float( splitted[5] )
                          
-                            while(value <= MAXvalue):
-                                values.append(value)
+                            while( value <= MAXvalue ):
+                                values.append( value )
                                 value += step
                             
-                            self.struct.addParamValues(values)
+                            self.struct.addParamValues( values )
                         
                         elif( splitted[2] == "enum" ):
                             for i in range(3, len(splitted) ):
                                 values.append( float(splitted[i]) )
                             
-                            self.struct.addParamValues(values)
+                            self.struct.addParamValues( values )
                              
                     elif( splitted[0] == "doe" ):
                         self.struct.setDoeKind( splitted[1] )
@@ -225,18 +223,13 @@ class server_handler():
                         self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[5] )
                     
                     elif( splitted[0] == "done" ):
-                        self.struct.setStatus("buildingDoe")
+                        self.struct.setStatus( "buildingDoe" )
                         
                         # notify the thread that computes the doeThread configurations
                         self.doeCond.notifyAll()
-            
-            #self.lock.release()
         
         elif( msg.topic == self.OPsTopic ):
             # msg.payload es.: "1 100000:5.3454867 0.2343545"
-            
-            #self.lock.acquire()
-            
             splitted = msg.payload.split(":")
             # splitted[0]: configuration
             # splitted[1]: metrics
@@ -254,15 +247,15 @@ class server_handler():
                     # if the configuration is not one of the done configurations
                     newOP = True
                     
-                    self.struct.addOP(msg.payload)
+                    self.struct.addOP( msg.payload )
 
-                    self.manageConfForDoEsModel(splitted)
+                    self.manageConfForDoEsModel( splitted )
                     
                     conf.decrementNumOPs()
                     
                     if( conf.getNumOPs() == 0 ):
                         # if I have the right number of ops for this configuration
-                        self.struct.addConfToDoneConfs(conf)
+                        self.struct.addConfToDoneConfs( conf )
                                                 
                         self.struct.removeConfToDoeConfs( conf )
                         
@@ -273,113 +266,105 @@ class server_handler():
                     break
             
             if( newOP == False ):
-                self.struct.addOtherOP(msg.payload)
-            
-            #self.lock.release()
-        
-        elif( msg.topic == self.disconnectionTopic ):
-            # a client (hostpid) has disconnected
-            #self.lock.acquire()
-            
-            self.struct.removeHostpid(msg.payload)
-
-            if( self.struct.getStatus() == "receivingInfo" and self.struct.getInfoHostpid() == msg.payload ):
-                self.struct.refreshStruct()
-
-                self.requestAppInfo()
-
-            #self.lock.release()
+                self.struct.addOtherOP( msg.payload )
                 
-    def connect(self, host):
-        self.client.connect(host, port = 8883)
-        self.client.on_connect = self.on_connect(host)
+    def connect( self, IPaddress, brokerPort ):
+        self.client.will_set(self.communicationTopic, payload = "disconnection", qos = self.qos, retain = False)
         
-    def subscribe(self, topic):
-        self.client.subscribe(topic, qos = self.qos)
-        self.client.on_subscribe = self.on_subscribe(topic)
+        self.client.connect( IPaddress, port = brokerPort )
+        self.client.on_connect = self.on_connect( IPaddress, brokerPort )
+        
+    def subscribe( self, topic ):
+        self.client.subscribe( topic, qos = self.qos )
+        self.client.on_subscribe = self.on_subscribe( topic )
         self.client.on_message = self.on_message
     
-    def on_publish(self, topic, message):
-        print ("\npublication")
-        print ("topic: " + topic)
-        print ("message: " + message)
+    def on_publish( self, topic, message ):
+        print( "\npublication" )
+        print( "topic: " + topic )
+        print( "message: " + message )
         
-    def publish(self, topic, message):
-        self.client.on_publish = self.on_publish(topic, message)
-        self.client.publish(topic, message, qos = self.qos)
+    def publish( self, topic, message ):
+        self.client.on_publish = self.on_publish( topic, message )
+        self.client.publish( topic, message, qos = self.qos )
     
     ####################################################################################################
     ####################################################################################################
     
         
-    def start(self, appName, hostpid):
-        self.struct = appStruct(appName)
+    def start( self, appName, hostpid ):
+        self.struct = appStruct( appName )
         
-        self.manageNewHostpid(hostpid)
-        
-        self.client = paho.Client(client_id = self.clientID + "_" + self.struct.getName())
-        self.connect(self.address)
-        
+        self.manageNewHostpid( hostpid )
+
+        self.buildTopics()
+
+        self.client = paho.Client( client_id = self.clientID + "_" + self.struct.getName() )
+        self.connect( self.IPaddress, self.brokerPort )
+
         self.firstSubscriptions()
-        
-        if( os.path.exists(self.root + self.tesiCris + self.struct.getName() + "/model.txt") == True ):
+
+        if( os.path.exists( self.root + self.tesiCris + self.struct.getName() + "/model.txt" ) == True ):
             self.loadModel()
             
-            self.struct.setStatus("autotuning")
-        
+            self.struct.setStatus( "autotuning" )
+
         else:
             self.secondSubscriptions()
             
             self.threadsCreation()
         
-        self.client.loop_forever()
+        self.client.loop_start()
+
+        while( True ):
+            pass
+
+        self.client.loop_stop()
     
-    def manageNewHostpid(self, hostpid):
-        self.struct.addHostpid(hostpid)
-    
-    def firstSubscriptions(self):
+    def manageNewHostpid( self, hostpid ):
+        self.struct.addHostpid( hostpid )
+
+    def buildTopics( self ):
         self.newHostpidTopic = self.tesiCris + self.struct.getName() + "/newHostpid"
-        self.subscribe(self.newHostpidTopic)
-        
         self.clientsReqTopic = self.tesiCris + self.struct.getName() + "/req"
-        self.subscribe(self.clientsReqTopic)
-        
         self.disconnectionTopic = self.tesiCris + self.struct.getName() + "/disconnection"
-        self.subscribe(self.disconnectionTopic)
-        
-    def secondSubscriptions(self):
         self.receiveInfoTopic_NoMultiLevel = self.tesiCris + self.struct.getName() + "/info"
         self.receiveInfoTopic = self.receiveInfoTopic_NoMultiLevel + "/#"
-        self.subscribe(self.receiveInfoTopic)
-        
         self.OPsTopic = self.tesiCris + self.struct.getName() + "/OPs"
-        self.subscribe(self.OPsTopic)
+        self.communicationTopic = self.tesiCris + self.struct.getName()
+
+    def firstSubscriptions( self ):
+        self.subscribe( self.newHostpidTopic )
         
-        self.doneConfTopic = self.tesiCris + self.struct.getName() + "/doneConf"
-        self.subscribe(self.doneConfTopic)
+        self.subscribe( self.clientsReqTopic )
         
-    def threadsCreation(self):
+        self.subscribe( self.disconnectionTopic )
+        
+    def secondSubscriptions( self ):
+        self.subscribe( self.receiveInfoTopic )
+        
+        self.subscribe( self.OPsTopic )
+        
+    def threadsCreation( self ):
         self.doeCond = threading.Condition()
         self.rsmCond = threading.Condition()
          
-        self.thread_doe = doeThread(1, self.struct.getName() + "_doe", self.doeCond, self.struct)
-        self.thread_rsm = rsmThread(2, self.struct.getName() + "_rsm", self.rsmCond, self.struct)
+        self.thread_doe = doeThread( 1, self.struct.getName() + "_doe", self.doeCond, self.struct )
+        self.thread_rsm = rsmThread( 2, self.struct.getName() + "_rsm", self.rsmCond, self.struct )
          
         # Start new Threads
         self.thread_doe.start()
         self.thread_rsm.start()
         
-    def requestAppInfo(self):
-        if( self.communicationTopic == None ):
-            self.communicationTopic = self.tesiCris + self.struct.getName()
-        self.publish(self.communicationTopic, "info")
+    def requestAppInfo( self ):
+        self.publish( self.communicationTopic, "info" )
     
-    def sendConfiguration(self, hostpid):
+    def sendConfiguration( self, hostpid ):
         if len( self.struct.getDoeConfs() ) > 0:
             #self.struct.restoreConfs(hostpid, False)
             
             configuration = self.struct.getDoeConfs().pop(0)
-            self.struct.addDoeConf(configuration)
+            self.struct.addDoeConf( configuration )
             
             confStr = ""
             for value in configuration.getConf():
@@ -394,32 +379,32 @@ class server_handler():
             # payload es.: "1 400000"
             self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/conf", confStr )
         
-    def checkStartRsm(self):
+    def checkStartRsm( self ):
         with self.rsmCond:
-            if( len(self.struct.getDoneConfs()) == self.struct.getDoeConfsNumber() ):
+            if( len( self.struct.getDoneConfs() ) == self.struct.getDoeConfsNumber() ):
                 self.struct.DoEsModelMeans()
 
                 # notify the thread that computes the model through Spark
                 self.rsmCond.notifyAll()
     
-    def sendModel(self, hostpid):
+    def sendModel( self, hostpid ):
         for op in self.struct.getModel():
-            op = op.replace(":", " ")
+            op = op.replace( ":", " " )
             
             self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", op )
         
-        self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "modelDone")
+        self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "modelDone" )
     
-    def loadModel(self):
+    def loadModel( self ):
         model = []
         
-        with open(self.root + self.tesiCris + self.struct.getName() + "/model.txt", 'r') as csvfile:
-            tracereader = csv.reader(csvfile)
+        with open( self.root + self.tesiCris + self.struct.getName() + "/model.txt", 'r' ) as csvfile:
+            tracereader = csv.reader( csvfile )
             for row in tracereader:
                 for op in row:
                     model.append( str(op) )
         
-        self.struct.setModel(model)
+        self.struct.setModel( model )
 
     def manageConfForDoEsModel( self, splittedOP ):
         # splittedOP is a list of strings
@@ -432,7 +417,7 @@ class server_handler():
         for metr in splittedOPMetrics:
             metricsValues.append( float(metr) )
 
-        if( self.struct.HasDoEsModelKey(splittedOP[0]) == True ):
+        if( self.struct.HasDoEsModelKey( splittedOP[0] ) == True ):
             values = self.struct.getDoEsModelKeyValues( splittedOP[0] )
 
             for i in range( len(values) ):
@@ -444,7 +429,10 @@ class server_handler():
             self.struct.setDoEsModelKeyValues( splittedOP[0], metricsValues )
 
     def sendDoEsModel( self, hostpid ):
-        for op in self.struct.getDoEsModelString():
-            self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", op )
-        
-        self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "DoEsModelDone")
+        if( hostpid not in self.DoEModelSent ):
+            for op in self.struct.getDoEsModelString():
+                self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", op )
+            
+            self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "DoEModelDone" )
+
+            self.DoEModelSent.append( hostpid )

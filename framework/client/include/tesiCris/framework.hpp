@@ -6,6 +6,7 @@
 #include "tesiCris/topics.hpp"
 
 #include <vector>
+#include <string>
 
 class Framework
 {
@@ -29,6 +30,9 @@ public:
 	void updateOPs();
 
 private:
+	std::string IPaddress = "127.0.0.1";
+	std::string brokerPort = "8883";
+
 	AppStruct *appStruct;
 	
 	MQTT *mqtt;

@@ -11,7 +11,7 @@ Framework::Framework( std::string name, int numParams, int numMetrics, std::vect
 
 	topics = new Topics( appStruct->getAppName(), appStruct->getHostpidStr() );
 
-	mqtt = new MQTT( *appStruct, *topics );
+	mqtt = new MQTT( IPaddress, brokerPort, *appStruct, *topics );
 }
 
 void Framework::checkOPs()

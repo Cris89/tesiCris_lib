@@ -1,6 +1,5 @@
-class configuration(object):
-
-    def __init__(self, conf, num):
+class configuration():
+    def __init__( self, conf, num ):
         '''
         Constructor
         '''
@@ -10,16 +9,16 @@ class configuration(object):
     
     
     
-    
-    def getConf(self):
+
+    def getConf( self ):
         return self.conf
     
     
     
     
     
-    def getNumOPs(self):
+    def getNumOPs( self ):
         return self.numOPs
     
-    def decrementNumOPs(self):
+    def decrementNumOPs( self ):
         self.numOPs -= 1

@@ -32,7 +32,7 @@ void ArgoOPs::makeCommonOPs()
 		{
 			if( newOP.first == currentOP.first )
 			{
-				commonOPs.push_back(newOP);
+				commonOPs.push_back( newOP );
 				newOPs.erase( std::remove( newOPs.begin(), newOPs.end(), newOP ), newOPs.end() );
 
 				break;
@@ -41,9 +41,9 @@ void ArgoOPs::makeCommonOPs()
 	}
 }
 
-void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, bool areNew)
+void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, bool areNew )
 {
-	if( areNew == true)
+	if( areNew == true )
 	{
 		newOPs.clear();
 	}
@@ -77,11 +77,11 @@ void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, boo
 
 				if( areNew == true )
 				{
-					newOPs.push_back(oper);
+					newOPs.push_back( oper );
 				}
 				else
 				{
-					currentOPs.push_back(oper);
+					currentOPs.push_back( oper );
 				}
 			}
 		}
@@ -109,11 +109,11 @@ void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, boo
 
 				if( areNew == true )
 				{
-					newOPs.push_back(oper);
+					newOPs.push_back( oper );
 				}
 				else
 				{
-					currentOPs.push_back(oper);
+					currentOPs.push_back( oper );
 				}
 			}
 		}

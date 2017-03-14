@@ -18,19 +18,22 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 	numMetrics = numM;
 
 	argoOPs = new ArgoOPs();
+	argoManager = new ArgoManager();
 
-	configurationsList.push_back(defaultConf);
+	defaultConfiguration = defaultConf;
+
+	configurationsList.push_back( defaultConfiguration );
 
 	AppStruct::updateOPs();
 
-	argoOPs->makeOPs(configurationsList, numParams, newOPs);
+	argoOPs->makeOPs( configurationsList, numParams, newOPs );
 
 
 
 
 
 	char hostname[128];
-	gethostname(hostname, 128);
+	gethostname( hostname, 128 );
 
 	int pid = getpid();
 
@@ -60,27 +63,16 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 
 
 
-	setStatus(defaultStatus);
+	setStatus( defaultStatus );
 }
 
 void AppStruct::addOp( std::vector<float> op )
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	model.push_back(op);
-}
-
-std::vector< std::vector<float> > AppStruct::getModel()
-{
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-	
-	return model;
 }
 
 bool AppStruct::checkOPs()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	if( configurationsList != currentConfigurations )
 	{
 		argoOPs->makeOPs( configurationsList, numParams, newOPs);
@@ -97,79 +89,67 @@ bool AppStruct::checkOPs()
 
 void AppStruct::clearModel()
 {	
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-	
 	model.clear();
 }
 
 std::string AppStruct::getAppName()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	return appName;
 }
 
 char *AppStruct::getAppName_hostpid()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	return appName_hostpid;
 }
 
 ArgoOPs *AppStruct::getArgoOPs()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	return argoOPs;
+}
+
+std::vector<float> AppStruct::getDefaultConfiguration()
+{
+	return defaultConfiguration;
 }
 
 char *AppStruct::getHostpid()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	return hostpid;
 }
 
 std::string AppStruct::getHostpidStr()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	std::string hostpidStr = hostpid;
 	return hostpidStr;
 }
 
 std::vector< std::string > AppStruct::getInfo()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	return info;
+}
+
+std::vector< std::vector<float> > AppStruct::getModel()
+{
+	return model;
 }
 
 AppStruct::appStatus AppStruct::getStatus()
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	return status;
 }
 
 void AppStruct::setConfigurationsList( std::vector< std::vector<float> > confsList )
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	configurationsList = confsList;
 }
 
 void AppStruct::setStatus( appStatus s)
 {
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-
 	status = s;
 }
 
 void AppStruct::updateOPs()
-{
-	//std::lock_guard<std::mutex> lock(appStruct_mutex);
-	
+{	
 	currentConfigurations = configurationsList;
 }
 

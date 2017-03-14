@@ -11,7 +11,7 @@
 class MQTT 
 {
 public:
-	MQTT( AppStruct &app, Topics &t );
+	MQTT( std::string IPaddress, std::string brokerPort, AppStruct &app, Topics &t );
 
 	void connect();
 
@@ -29,6 +29,8 @@ private:
 	// clientID
 	// es.: "swaptions_crisXPS15_1897"
 	static char *clientID;
+
+	const char *connectionAddress;
 
 	static MQTTClient_messageArrived messageArrived;
 

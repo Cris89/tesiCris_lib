@@ -7,7 +7,6 @@
 #include <thread>
 #include <chrono>
 
-#define ADDRESS				"127.0.0.1:8883"
 #define TIMEOUT				10000L
 #define QOS					0
 
@@ -21,10 +20,17 @@ int MQTT::rc;
 
 Topics *MQTT::topics;
 
-MQTT::MQTT( AppStruct &app, Topics &t )
+MQTT::MQTT( std::string IPaddress, std::string brokerPort, AppStruct &app, Topics &t )
 {
 	appStruct = &app;
 	topics = &t;
+
+	std::string connectionAddressStr = IPaddress + ":" + brokerPort;
+	
+	char *connectionAddressP = new char[connectionAddressStr.length() + 1];
+	std::strcpy( connectionAddressP, connectionAddressStr.c_str() );
+
+	connectionAddress = connectionAddressP;
 
 
 
@@ -41,8 +47,8 @@ MQTT::MQTT( AppStruct &app, Topics &t )
 
 
 	
-	rc = MQTTClient_create(&client, ADDRESS, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-	rc = MQTTClient_setCallbacks(client, NULL, NULL, messageArrived, NULL);
+	rc = MQTTClient_create( &client, connectionAddress, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL );
+	rc = MQTTClient_setCallbacks( client, NULL, NULL, messageArrived, NULL );
 
 	pthread_create( &reqThread, NULL, MQTT::reqThreadFunc, NULL );
 }
@@ -61,7 +67,7 @@ void MQTT::connect()
 	
 	rc = MQTTClient_connect(client, &conn_opts);
 	
-	printf( "\nclientID: %s connected at %s", clientID, ADDRESS );
+	printf( "\nclientID: %s connected at %s", clientID, connectionAddress );
 }
 
 int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClient_message *message )
@@ -74,19 +80,34 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 	std::string payload( (char *)message->payload, message->payloadlen );
 
 	if( topic == topics->getCommunicationTopic() )
-	{	
-		for( int i = 0; i < appStruct->getInfo().size(); i++ ) 
+	{
+		if( payload == "info" )
 		{
-    		char* message = new char[ appStruct->getInfo()[i].length() + 1 ];
-			std::strcpy( message, appStruct->getInfo()[i].c_str() );
+			for( int i = 0; i < appStruct->getInfo().size(); i++ ) 
+			{
+	    		char* message = new char[ appStruct->getInfo()[i].length() + 1 ];
+				std::strcpy( message, appStruct->getInfo()[i].c_str() );
 
-			MQTT::publish( message, topics->getSendInfoTopic() );
+				MQTT::publish( message, topics->getSendInfoTopic() );
+			}
+
+			char done[] = "done";
+			char* doneP = done;
+			
+			MQTT::publish( doneP, topics->getSendInfoTopic() );
 		}
 
-		char done[] = "done";
-		char* doneP = done;
-		
-		MQTT::publish( doneP, topics->getSendInfoTopic() );
+		else if( payload == "disconnection" )
+		{
+			if( appStruct->getStatus() != AppStruct::doeModel || appStruct->getStatus() != AppStruct::autotuning )
+			{
+				std::vector< std::vector<float> > defaultConf;
+				defaultConf.push_back( appStruct->getDefaultConfiguration() );
+
+				appStruct->setConfigurationsList( defaultConf );
+				appStruct->setStatus( AppStruct::defaultStatus );
+			}
+		}
 	}
 
 	else if( topic == topics->getConfTopic() )
@@ -100,11 +121,11 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 		while (ss >> token)
 		{
 			const char* numberptr = token.c_str();
-		    float number = atof(numberptr);
-		    conf.push_back(number);
+		    float number = atof( numberptr );
+		    conf.push_back( number );
 		}
 
-		confsList.push_back(conf);
+		confsList.push_back( conf );
 		appStruct->setConfigurationsList( confsList );
 
 		if( appStruct->getStatus() != AppStruct::dse )
@@ -115,13 +136,14 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 
 	else if( topic == topics->getModelTopic() )
 	{
-		if( payload == "DoEsModelDone")
+		if( payload == "DoEModelDone")
 		{
 			appStruct->setConfigurationsList( appStruct->getModel() );
 			appStruct->clearModel();
+			appStruct->setStatus( AppStruct::doeModel );
 		}
 
-		else if ( payload == "modelDone")
+		else if( payload == "modelDone" )
 		{
 			appStruct->setConfigurationsList( appStruct->getModel() );
 			appStruct->clearModel();
@@ -135,20 +157,20 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 
 			std::vector<float> op;
 
-			while (ss >> token)
+			while( ss >> token )
 			{
 				const char* numberptr = token.c_str();	    
-			    float number = atof(numberptr);
+			    float number = atof( numberptr );
 
-			    op.push_back(number);
+			    op.push_back( number );
 			}
 
-			appStruct->addOp(op);
+			appStruct->addOp( op );
 		}
 	}
 
-	MQTTClient_freeMessage(&message);
-	MQTTClient_free(topicName);
+	MQTTClient_freeMessage( &message );
+	MQTTClient_free( topicName );
 
 	return 1;
 }
@@ -158,7 +180,7 @@ void MQTT::publish( char *payload, const char *topicName )
 	MQTTClient_message msg = MQTTClient_message_initializer;
 	
 	msg.payload = payload;
-	msg.payloadlen = strlen(payload);
+	msg.payloadlen = strlen( payload );
 
 	msg.qos = QOS;
 
@@ -166,10 +188,10 @@ void MQTT::publish( char *payload, const char *topicName )
 	
 	MQTTClient_deliveryToken dt;
 
-	rc = MQTTClient_publishMessage(client, topicName, &msg, &dt);
-	rc = MQTTClient_waitForCompletion(client, dt, TIMEOUT);
+	rc = MQTTClient_publishMessage( client, topicName, &msg, &dt );
+	rc = MQTTClient_waitForCompletion( client, dt, TIMEOUT );
 
-	printf("\n\n%s publication\ntopic: %s\npayload: %s\n", clientID, topicName, payload);
+	printf( "\n\n%s publication\ntopic: %s\npayload: %s\n", clientID, topicName, payload );
 }
 
 void *MQTT::reqThreadFunc( void * )
@@ -186,9 +208,9 @@ void MQTT::subscribe( const char *topic )
 {
 	int qos = QOS;
 
-	rc = MQTTClient_subscribe(client, topic, qos);
+	rc = MQTTClient_subscribe( client, topic, qos );
 	
-	printf("\n\n%s subscribed to %s", clientID, topic);
+	printf( "\n\n%s subscribed to %s", clientID, topic );
 }
 
 MQTT::~MQTT()

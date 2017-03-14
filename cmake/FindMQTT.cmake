@@ -12,7 +12,7 @@
 find_path( MQTT_INCLUDES MQTTClient.h PATHS
                     /usr/local/include
                     /usr/include
-                    ${CMAKE_EXTRA_INCLUDES}
+                    ${MQTT_ROOT}/include
           )
 
 ## -----------------------------------------------------------------------------
@@ -20,12 +20,12 @@ find_path( MQTT_INCLUDES MQTTClient.h PATHS
 
 # check for the MQTT library
 find_library( MQTT_LIBRARIES libpaho-mqtt3a.so libpaho-mqtt3as.so lib/libpaho-mqtt3c.so libpaho-mqtt3cs.so
-	PATHS ${MQTT_ROOT}
+	PATHS ${MQTT_ROOT}/lib
 	NO_DEFAULT_PATH
 	)
 if( NOT MQTT_LIBRARIES )
 	find_library( MQTT_LIBRARIES libpaho-mqtt3a.so libpaho-mqtt3as.so lib/libpaho-mqtt3c.so libpaho-mqtt3cs.so
-		PATHS /usr/local/lib /usr/lib /lib ${MQTT_ROOT}
+		PATHS /usr/local/lib /usr/lib /lib
 		)
 endif( NOT MQTT_LIBRARIES )
 

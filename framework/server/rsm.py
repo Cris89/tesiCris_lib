@@ -4,14 +4,13 @@ class rsm():
     '''
     classdocs
     '''
-
-    def __init__(self, struct):
+    def __init__( self, struct ):
         '''
         Constructor
         '''
         self.appStruct = struct
     
-    def buildRsm(self):
+    def buildRsm( self ):
         if( self.appStruct.getRsmKind() == "sparkGenLinRegr" ):
             rsm = sparkGenLinearRegr( self.appStruct.getName(),
                                       self.appStruct.getMetrics(),

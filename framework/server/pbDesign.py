@@ -1,9 +1,9 @@
 from pyDOE import *
 from configuration import configuration
 
-class fcccDesign():
+class pbDesign():
     '''
-    face centered central composite design (with one center point) generation
+    Plackett-Burman design generation
     ''' 
     def __init__( self, paramsValues, numOPs ):
         '''
@@ -15,9 +15,9 @@ class fcccDesign():
         self.configurations = []
     
     def buildConfigurations( self ):
-        ccd = ccdesign( len(self.paramsValues), center = (1, 0), face = "ccf" )
+        pbd = pbdesign( len(self.paramsValues) )
          
-        for indexCCD, itemCCD in enumerate( ccd ):
+        for indexCCD, itemCCD in enumerate( pbd ):
             conf = []
             
             for indexRow, itemRow in enumerate( itemCCD ):
@@ -30,10 +30,6 @@ class fcccDesign():
                 # value == -1 --> minValue of the corresponding parameter
                 elif itemRow == -1:
                     conf.append( parameterValues[0] )
-                    
-                # value == 0 --> medianValue of the corresponding parameter
-                elif itemRow == 0:
-                    conf.append( parameterValues[ int( (len(parameterValues) / float(2)) - 0.5 ) ] )
             
             config = configuration( conf, self.numOPs )
             self.configurations.append( config )

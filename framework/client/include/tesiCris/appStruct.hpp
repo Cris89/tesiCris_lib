@@ -2,16 +2,16 @@
 #define TESICRIS_APPSTRUCT_HPP
 
 #include "tesiCris/argoOPs.hpp"
+#include "tesiCris/argoManager.hpp"
 
 #include <vector>
 #include <deque>
-#include <mutex>
 #include <string>
 
 class AppStruct
 {
 public:
-	enum appStatus{ defaultStatus, dse, autotuning };
+	enum appStatus{ defaultStatus, dse, doeModel, autotuning };
 
 	enum OPsType : bool {
     newOPs = true,
@@ -32,6 +32,8 @@ public:
 	char *getAppName_hostpid();
 	
 	ArgoOPs *getArgoOPs();
+
+	std::vector<float> getDefaultConfiguration();
 	
 	char *getHostpid();
 	
@@ -52,13 +54,12 @@ public:
 	virtual ~AppStruct();
 
 private:
-	std::mutex appStruct_mutex;
-
 	std::string appName;
 
 	bool areNewOPs;
 	
 	ArgoOPs *argoOPs;
+	ArgoManager *argoManager;
 	
 	// application name + hostpid
 	// es.: "swaptions crisXPS15_1897"
@@ -71,6 +72,9 @@ private:
 	
 	// double-ended queue che contiene le configurazioni con cui l'app deve essere eseguita
 	std::vector< std::vector<float> > currentConfigurations;
+
+	// default configuration
+	std::vector<float> defaultConfiguration;
 
 	char *hostpid;
 	

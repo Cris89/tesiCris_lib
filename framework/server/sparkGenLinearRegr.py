@@ -1,17 +1,16 @@
+import copy
+import csv
 import itertools
 from libsvmFiles import libsvm
 import os
-import copy
 import shutil
 import subprocess
-import csv
 
 class sparkGenLinearRegr():
     '''
     classdocs
     '''
- 
-    def __init__(self, app, metrs, transforms, paramVs, OPs):
+    def __init__( self, app, metrs, transforms, paramVs, OPs ):
         '''
         Constructor
         '''
@@ -35,7 +34,7 @@ class sparkGenLinearRegr():
         # parameters and metrics (in this order)
         # es.: [ [1.0, 1.0, 1.0], [100000.0, 100000.0, 100000.0], [5.4573, 6.0573, 5.7573], [32.584, 31.004, 33.0] ]
         self.OPsList = [ [] for _ in range( len(self.metrics) + len(self.paramsValues) ) ]       
-        self.buildOPsList(OPs)
+        self.buildOPsList( OPs )
         
         # all the possible configurations (testing list values,
         # with witch spark will generate the complete model)
@@ -50,16 +49,16 @@ class sparkGenLinearRegr():
         self.comand = "/home/cris/spark/bin/pyspark"
         self.args = self.comand.split(" ")
     
-    def buildOPsList(self, OPs):
+    def buildOPsList( self, OPs ):
         for string in OPs:
-            string = string.replace(":", " ")
+            string = string.replace( ":", " " )
             
             splitted = string.split(" ")
             
             for i in range( len(splitted) ):
                 self.OPsList[i].append( float(splitted[i]) )
     
-    def buildTestingValues(self):
+    def buildTestingValues( self ):
         # create all the possible configurations (testing list values,
         # with witch spark will generate the complete ops list)
         fakePrediction = 6
@@ -67,36 +66,36 @@ class sparkGenLinearRegr():
         cartesianProduct = itertools.product( *self.paramsValues )
         
         for tupla in cartesianProduct:
-            self.testing[0].append(fakePrediction)
+            self.testing[0].append( fakePrediction )
             for i in range( len(tupla) ):
-                self.testing[i + 1].append(tupla[i])
+                self.testing[i + 1].append( tupla[i] )
     
-    def manageSparkFolder(self):
+    def manageSparkFolder( self ):
         # spark folder
-        if( os.path.isdir(self.sparkFolder) == True ):
-            shutil.rmtree(self.sparkFolder)
+        if( os.path.isdir( self.sparkFolder ) == True ):
+            shutil.rmtree( self.sparkFolder )
             
         # es.: /home/cris/Documents/tesiCris/swaptions/spark
-        os.makedirs(self.sparkFolder)
+        os.makedirs( self.sparkFolder )
     
-    def buildModel(self):
+    def buildModel( self ):
         # start spark subprocess
         sparkProc = subprocess.Popen( self.args, stdin = subprocess.PIPE )
 
-        if( len(self.transformations) > 0 ):
+        if( len( self.transformations ) > 0 ):
             # I know the transformations
-            self.knownModel(sparkProc)
+            self.knownModel( sparkProc )
              
         else:
             # I don't know the transformations --> bruteforce
-            self.unknownModel(sparkProc)
+            self.unknownModel( sparkProc )
                                 
         # wait spark subprocess to terminate        
         sparkProc.communicate()
         
         return self.finalModel()
     
-    def knownModel(self, sparkProc):
+    def knownModel( self, sparkProc ):
         # possible parameters transformations, final libsvm files
         lib = libsvm()
         
@@ -123,16 +122,16 @@ class sparkGenLinearRegr():
             training = []          
             
             # add metric values to training list
-            metricV = copy.deepcopy(self.OPsList[ len(self.paramsValues) + 
-                                          self.transformations.keys().index(metric[0]) ])
-            training.append(metricV)
+            metricV = copy.deepcopy( self.OPsList[ len(self.paramsValues) + 
+                                          self.transformations.keys().index(metric[0]) ] )
+            training.append( metricV )
             
             # add parameters values to training list
             for feature in range( 0, len(self.paramsValues) ):
                 featureV = copy.deepcopy( self.OPsList[feature] )
-                training.append(featureV)
+                training.append( featureV )
                 
-            lib.insertInput(training)
+            lib.insertInput( training )
             
             trainingFilename = "training_" + metric[0] + "_"
             
@@ -141,26 +140,26 @@ class sparkGenLinearRegr():
                     trainingFilename += "id" + str(feature + 1)
                     
                 elif( metric[1][feature] == "ln" ):
-                    lib.lnFeature(feature + 1)
+                    lib.lnFeature( feature + 1 )
                      
                     trainingFilename += "ln" + str(feature + 1)
                  
                 elif( metric[1][feature] == "sqrt" ):
-                    lib.sqrtFeature(feature + 1)
+                    lib.sqrtFeature( feature + 1 )
                      
                     trainingFilename += "sqrt" + str(feature + 1)
                  
                 elif( metric[1][feature] == "inv" ):
-                    lib.invFeature(feature + 1)
+                    lib.invFeature( feature + 1 )
                      
                     trainingFilename += "inv" + str(feature + 1)
             
             # training modifications in order to let the linear regression work
             # es.: if link function == "log", metrics must not be < limit value
-            lib.correctMetrics(link)
+            lib.correctMetrics( link )
             
             # final training libsvm file
-            lib.libsvmfile(self.sparkFolder + trainingFilename + ".txt")
+            lib.libsvmfile( self.sparkFolder + trainingFilename + ".txt" )
             
             sparkProc.stdin.write( "\n\n\n# load " + metric[0] + " training data\
 \n" + trainingFilename + " = spark.read.format(\"libsvm\").load(\"" + self.sparkFolder + trainingFilename + ".txt\")" )
@@ -173,8 +172,8 @@ class sparkGenLinearRegr():
 \n\tprint( \"" + metric[0] + ": can't fit its model\" )" )
             
             # testing file
-            values = copy.deepcopy(self.testing) 
-            lib.insertInput(values)
+            values = copy.deepcopy( self.testing ) 
+            lib.insertInput( values )
             
             featuresTransformations = ""
 
@@ -183,17 +182,17 @@ class sparkGenLinearRegr():
                     featuresTransformations += "id" + str(feature + 1)
                     
                 elif( metric[1][feature] == "ln" ):
-                    lib.lnFeature(feature + 1)
+                    lib.lnFeature( feature + 1 )
                      
                     featuresTransformations += "ln" + str(feature + 1)
                  
                 elif( metric[1][feature] == "sqrt" ):
-                    lib.sqrtFeature(feature + 1)
+                    lib.sqrtFeature( feature + 1 )
                      
                     featuresTransformations += "sqrt" + str(feature + 1)
                  
                 elif( metric[1][feature] == "inv" ):
-                    lib.invFeature(feature + 1)
+                    lib.invFeature( feature + 1 )
                      
                     featuresTransformations += "inv" + str(feature + 1)
             
@@ -201,7 +200,7 @@ class sparkGenLinearRegr():
             # es.: "testing_avg_throughput_ln1ln2"
             
             # final testing libsvm file
-            lib.libsvmfile(self.sparkFolder + testingFilename + ".txt")
+            lib.libsvmfile( self.sparkFolder + testingFilename + ".txt" )
             
             sparkProc.stdin.write( "\n\n# load " + metric[0] + " testing data\
 \n" + testingFilename + " = spark.read.format(\"libsvm\").load(\"" + self.sparkFolder + testingFilename + ".txt\")" )
@@ -222,7 +221,7 @@ class sparkGenLinearRegr():
             
             sparkProc.stdin.write( "\n\npreds_" + metric[0] + ".close()" )
     
-    def unknownModel(self, sparkProc):
+    def unknownModel( self, sparkProc ):
         # possible parameters transformations, final libsvm files
         lib = libsvm()
         
@@ -241,7 +240,7 @@ class sparkGenLinearRegr():
             sparkFolderMetricDir = self.sparkFolder + metric
             # es.: "/home/cris/Documents/tesiCris/swaptions/spark/avg_throughput"
             
-            os.mkdir(sparkFolderMetricDir)
+            os.mkdir( sparkFolderMetricDir )
             
             # training list values
             training = []
@@ -252,13 +251,13 @@ class sparkGenLinearRegr():
             
             # add parameters values to training list
             for feature in range( 0, len(self.paramsValues) ):
-                training.append(self.OPsList[feature])
+                training.append( self.OPsList[feature] )
         
             sparkProc.stdin.write( "\n\nmodels_AIC_meanCoeffStandErrs_index_Dict = {}" )
             sparkProc.stdin.write( "\nmodels = []" )
             sparkProc.stdin.write( "\ni = 0" )
         
-            linkFunctions = ["identity", "log", "inverse"]
+            linkFunctions = ["identity", "log", "inverse" ]
              
             transformations = ["id", "ln", "inv", "sqrt"]
             cartesianProduct = itertools.product(transformations, repeat = len( self.paramsValues ) )
@@ -269,67 +268,67 @@ class sparkGenLinearRegr():
                 # es.: ("id", "ln")
                 
                 # testing file
-                values = copy.deepcopy(self.testing) 
-                lib.insertInput(values)
+                values = copy.deepcopy( self.testing ) 
+                lib.insertInput( values )
                  
                 featuresTransformations = ""
                  
-                for index, item in enumerate(tupla):
+                for index, item in enumerate( tupla ):
                     if( item == "id" ):
                         featuresTransformations += item + str(index + 1)
                      
                     elif( item == "ln" ):
-                        lib.lnFeature(index + 1)
+                        lib.lnFeature( index + 1 )
                         featuresTransformations += item + str(index + 1)
                          
                     elif( item == "inv" ):
-                        lib.invFeature(index + 1)
+                        lib.invFeature( index + 1 )
                         featuresTransformations += item + str(index + 1)
                      
                     elif( item == "sqrt" ):
-                        lib.sqrtFeature(index + 1)
+                        lib.sqrtFeature( index + 1 )
                         featuresTransformations += item + str(index + 1)
                  
                 testingFilename = "testing_" + featuresTransformations
                 # es.: "testing_id1ln2"
                 
                 # final testing libsvm file
-                lib.libsvmfile(sparkFolderMetricDir + "/" + testingFilename + ".txt")
+                lib.libsvmfile( sparkFolderMetricDir + "/" + testingFilename + ".txt" )
                 
                 for link in linkFunctions:
                     # es.: "log"
                     
                     # training file
-                    values = copy.deepcopy(training)
-                    lib.insertInput(values)
+                    values = copy.deepcopy( training )
+                    lib.insertInput( values )
                      
                     featuresTransformations = ""
                      
-                    for index, item in enumerate(tupla):
+                    for index, item in enumerate( tupla ):
                         if( item == "id" ):
                             featuresTransformations += item + str(index + 1)
                          
                         elif( item == "ln" ):
-                            lib.lnFeature(index + 1)
+                            lib.lnFeature( index + 1 )
                             featuresTransformations += item + str(index + 1)
                              
                         elif( item == "inv" ):
-                            lib.invFeature(index + 1)
+                            lib.invFeature( index + 1 )
                             featuresTransformations += item + str(index + 1)
                          
                         elif( item == "sqrt" ):
-                            lib.sqrtFeature(index + 1)
+                            lib.sqrtFeature( index + 1 )
                             featuresTransformations += item + str(index + 1)
                     
                     # training modifications in order to let the linear regression work
                     # es.: if link function == "log", metrics must not be < limit value
-                    lib.correctMetrics(link)
+                    lib.correctMetrics( link )
                      
                     trainingFilename = "training_" + featuresTransformations + "_" + link
                     # es.: "training_id1ln2_log"
                     
                     # final training libsvm file
-                    lib.libsvmfile(sparkFolderMetricDir + "/" + trainingFilename + ".txt")
+                    lib.libsvmfile( sparkFolderMetricDir + "/" + trainingFilename + ".txt" )
                     
                     sparkProc.stdin.write( "\n\n\n# Load training data\
 \n" + trainingFilename + " = spark.read.format(\"libsvm\").load(\"" + sparkFolderMetricDir + "/" + trainingFilename + ".txt\")" )
@@ -388,26 +387,26 @@ class sparkGenLinearRegr():
              
             sparkProc.stdin.write( "\n\npredictions.close()\n" )
 
-    def finalModel(self):
+    def finalModel( self ):
         # collect all the predictions (list of metric predictions lists)
         predictions = []
          
         for metric in self.metrics:
             predictionsMetric = []
-            with open(self.sparkFolder + "predictions_" + metric + ".txt", 'r') as csvfile:
-                tracereader = csv.reader(csvfile)
+            with open( self.sparkFolder + "predictions_" + metric + ".txt", 'r' ) as csvfile:
+                tracereader = csv.reader( csvfile )
                 for row in tracereader:
                     for element in row:
-                        predictionsMetric.append(element)
+                        predictionsMetric.append( element )
             
             # delete the first row with model info
             predictionsMetric.pop(0)
             
-            predictions.append(predictionsMetric)        
+            predictions.append( predictionsMetric )        
         
         # create the complete ops list (strings with parameters and metrics values)
         model = []
-        modelFile = open(self.tesiCris + self.appName + "/model.txt", "a")
+        modelFile = open( self.tesiCris + self.appName + "/model.txt", "a" )
         
         for j in range( len( self.testing[0] ) ):
             op = ""
@@ -426,8 +425,8 @@ class sparkGenLinearRegr():
                 else:
                     op += str( predictions[i][j] )
             
-            model.append(op)
-            modelFile.write(op + "\n")
+            model.append( op )
+            modelFile.write( op + "\n" )
         
         modelFile.close()
         
