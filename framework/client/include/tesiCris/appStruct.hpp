@@ -2,7 +2,6 @@
 #define TESICRIS_APPSTRUCT_HPP
 
 #include "tesiCris/argoOPs.hpp"
-#include "tesiCris/argoManager.hpp"
 
 #include <vector>
 #include <deque>
@@ -59,7 +58,6 @@ private:
 	bool areNewOPs;
 	
 	ArgoOPs *argoOPs;
-	ArgoManager *argoManager;
 	
 	// application name + hostpid
 	// es.: "swaptions crisXPS15_1897"

@@ -18,7 +18,6 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 	numMetrics = numM;
 
 	argoOPs = new ArgoOPs();
-	argoManager = new ArgoManager();
 
 	defaultConfiguration = defaultConf;
 

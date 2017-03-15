@@ -1,0 +1,224 @@
+# - Check for the presence of the Argo framework
+#
+# The following variables are set when Argo is found:
+#  HAVE_ARGO         = Set to true, if all components of Argo
+#                          have been found.
+#  ARGO_INCLUDES  = Include path for the header files of Argo
+#  ARGO_LIBRARIES    = Link these to use ANTAREX
+#  ARGO_CLI_COMMAND  = Path to the command line interface binary
+
+
+
+## -----------------------------------------------------------------------------
+## Check for the header files
+
+set(ARGO_SOURCE_PATH @PROJECT_SOURCE_DIR@ )
+set(ARGO_BINARY_PATH @PROJECT_BINARY_DIR@ )
+set(ARGO_INSTALL_PATH @CMAKE_INSTALL_PREFIX@ )
+
+# check for the header of the monitor module
+find_path (ARGO_MONITOR_INCLUDES argo/monitor.hpp PATHS
+                    ${ARGO_SOURCE_PATH}/framework/monitor/include
+                    /usr/local/include
+                    /usr/include
+                    ${ARGO_INSTALL_PATH}/include
+                    ${CMAKE_EXTRA_INCLUDES}
+          )
+
+# check for the header of the asrtm module
+find_path (ARGO_ASRTM_INCLUDES argo/view.hpp PATHS
+                    ${ARGO_SOURCE_PATH}/framework/asrtm/include
+                    /usr/local/include
+                    /usr/include
+                    ${ARGO_INSTALL_PATH}/include
+                    ${CMAKE_EXTRA_INCLUDES}
+          )
+
+# check for the header of the configuration file
+find_path (ARGO_CONF_INCLUDE argo/config.hpp PATHS
+                    ${ARGO_BINARY_PATH}/framework/include
+                    /usr/local/include
+                    /usr/include
+                    ${ARGO_INSTALL_PATH}/include
+                    ${CMAKE_EXTRA_INCLUDES}
+          )
+
+# check for the header of the configuration file
+find_path (ARGO_CLI_COMMAND argo_cli PATHS
+                    ${ARGO_SOURCE_PATH}/argo_gangway/argo_gangway_cli/bin
+                    /usr/local/bin
+                    /usr/bin
+                    ${ARGO_INSTALL_PATH}/bin
+                    ${CMAKE_EXTRA_INCLUDES}
+          )
+
+# check for the papi framework
+set( PAPI_ROOT $ENV{PAPI_ROOT})
+find_path (PAPI_INCLUDES papi.h
+	PATHS ${PAPI_ROOT}/include
+	NO_DEFAULT_PATH
+	)
+if (NOT PAPI_INCLUDES)
+	find_path (PAPI_INCLUDES include/papi.h
+		PATHS /usr/local /usr ${CMAKE_EXTRA_INCLUDES}
+		)
+endif(NOT PAPI_INCLUDES)
+
+# check for the sensor framework
+set( SENSORS_ROOT $ENV{SENSORS_ROOT})
+find_path (SENSORS_INCLUDES sensors/sensors.h
+	PATHS ${SENSORS_ROOT}/include
+	NO_DEFAULT_PATH
+	)
+if (NOT SENSORS_INCLUDES)
+	find_path (SENSORS_INCLUDES sensors/sensors.h
+		PATHS /usr/local /usr ${CMAKE_EXTRA_INCLUDES}
+		)
+endif(NOT SENSORS_INCLUDES)
+
+# check for the collector framework
+set( COLLECTOR_ROOT $ENV{COLLECTOR_ROOT})
+find_path (COLLECTOR_INCLUDES antarex_collector.h
+	PATHS ${COLLECTOR_ROOT}
+	NO_DEFAULT_PATH
+	)
+if (NOT COLLECTOR_INCLUDES)
+	find_path (COLLECTOR_INCLUDES include/antarex_collector.h
+		PATHS /usr/local /usr ${CMAKE_EXTRA_INCLUDES}
+		)
+endif(NOT COLLECTOR_INCLUDES)
+
+# compose the real list of paths
+set( ARGO_INCLUDES ${ARGO_MONITOR_INCLUDES} ${ARGO_ASRTM_INCLUDES} ${ARGO_CONF_INCLUDE} )
+if (PAPI_INCLUDES)
+	list( APPEND ARGO_INCLUDES ${PAPI_INCLUDES} )
+endif (PAPI_INCLUDES)
+if (SENSORS_INCLUDES)
+	list( APPEND ARGO_INCLUDES ${SENSORS_INCLUDES} )
+endif (SENSORS_INCLUDES)
+if (COLLECTOR_INCLUDES)
+	list( APPEND ARGO_INCLUDES ${COLLECTOR_INCLUDES} )
+endif (COLLECTOR_INCLUDES)
+
+list( REMOVE_DUPLICATES ARGO_INCLUDES )
+
+
+## -----------------------------------------------------------------------------
+## Check for the libraries
+
+# check for the monitor module
+find_library (ARGO_MONITOR_LIBRARY argo_monitor PATHS
+                ${ARGO_BINARY_PATH}/framework/monitor
+                ${ARGO_INSTALL_PATH}/lib
+                /usr/local/lib
+                /usr/lib /lib
+                ${CMAKE_EXTRA_LIBRARIES}
+  )
+
+
+# check for the asrtm module
+find_library (ARGO_ASRTM_LIBRARY argo_asrtm PATHS
+                ${ARGO_BINARY_PATH}/framework/asrtm
+                ${ARGO_INSTALL_PATH}/lib
+                /usr/local/lib
+                /usr/lib /lib
+                ${CMAKE_EXTRA_LIBRARIES}
+  )
+
+# check for the PAPI library
+find_library (PAPI_LIBRARIES libpapi.a papi
+	PATHS ${PAPI_ROOT}/lib
+	NO_DEFAULT_PATH
+	)
+if (NOT PAPI_LIBRARIES)
+	find_library (PAPI_LIBRARIES libpapi.a papi
+		PATHS /usr/local/lib /usr/lib /lib ${CMAKE_EXTRA_LIBRARIES}
+		)
+endif (NOT PAPI_LIBRARIES)
+
+# check for the SENSOR library
+find_library (SENSORS_LIBRARIES libsensors.so.4 libsensors.so sensors
+	PATHS ${SENSORS_ROOT}
+	NO_DEFAULT_PATH
+	)
+if (NOT SENSORS_LIBRARIES)
+	find_library (SENSORS_LIBRARIES libsensors.so.4 libsensors.so sensors
+		PATHS /usr/local/lib /usr/lib /lib ${CMAKE_EXTRA_LIBRARIES}
+		)
+endif (NOT SENSORS_LIBRARIES)
+
+# check for the COLLECTOR library
+find_library (COLLECTOR_LIBRARY libcollector.a collector
+	PATHS ${COLLECTOR_ROOT}
+	NO_DEFAULT_PATH
+	)
+if (NOT COLLECTOR_LIBRARY)
+	find_library (COLLECTOR_LIBRARY libcollector.a collector
+		PATHS /usr/local/lib /usr/lib /lib ${CMAKE_EXTRA_LIBRARIES}
+		)
+endif (NOT COLLECTOR_LIBRARY)
+
+# append the libraries
+set( ARGO_LIBRARIES ${ARGO_ASRTM_LIBRARY} ${ARGO_MONITOR_LIBRARY} )
+if (PAPI_LIBRARIES)
+	list( APPEND ARGO_LIBRARIES ${PAPI_LIBRARIES} )
+endif(PAPI_LIBRARIES)
+if (SENSORS_LIBRARIES)
+	list( APPEND ARGO_LIBRARIES ${SENSORS_LIBRARIES} )
+endif(SENSORS_LIBRARIES)
+if (COLLECTOR_LIBRARY)
+	find_library (MOSQUITTO_LIBRARY libmosquitto.a mosquitto
+		PATHS ${COLLECTOR_ROOT}/../lib/mosquitto-1.3.5/lib
+		NO_DEFAULT_PATH
+		)
+	if (NOT COLLECTOR_LIBRARY)
+		find_library (MOSQUITTO_LIBRARY libmosquitto.a mosquitto
+			PATHS /usr/local/lib /usr/lib /lib ${CMAKE_EXTRA_LIBRARIES}
+			)
+	endif (NOT COLLECTOR_LIBRARY)
+	list( APPEND ARGO_LIBRARIES ${COLLECTOR_LIBRARY} ${MOSQUITTO_LIBRARY} ssl crypto pthread )
+endif(COLLECTOR_LIBRARY)
+
+list( REMOVE_DUPLICATES ARGO_LIBRARIES )
+
+
+
+## -----------------------------------------------------------------------------
+## Actions taken when all components have been found
+
+
+if (ARGO_MONITOR_INCLUDES AND ARGO_ASRTM_INCLUDES AND ARGO_CONF_INCLUDE AND ARGO_MONITOR_LIBRARY AND ARGO_ASRTM_LIBRARY AND ARGO_CLI_COMMAND)
+  set (HAVE_ARGO TRUE)
+else (ARGO_MONITOR_INCLUDES AND ARGO_ASRTM_INCLUDES AND ARGO_CONF_INCLUDE AND ARGO_MONITOR_LIBRARY AND ARGO_ASRTM_LIBRARY AND ARGO_CLI_COMMAND)
+  if (NOT ARGO_FIND_QUIETLY)
+    if (NOT (ARGO_MONITOR_INCLUDES AND ARGO_ASRTM_INCLUDES AND ARGO_CONF_INCLUDE))
+      message (STATUS "Unable to find ARGO header files!")
+    endif (NOT (ARGO_MONITOR_INCLUDES AND ARGO_ASRTM_INCLUDES AND ARGO_CONF_INCLUDE))
+    if (NOT (ARGO_MONITOR_LIBRARY AND ARGO_ASRTM_LIBRARY))
+      message (STATUS "Unable to find ARGO library files!")
+    endif (NOT (ARGO_MONITOR_LIBRARY AND ARGO_ASRTM_LIBRARY))
+    if (NOT ARGO_CLI_COMMAND)
+      message (STATUS "Unable to fine ARGO gagway command line interface")
+    endif (NOT ARGO_CLI_COMMAND)
+  endif (NOT ARGO_FIND_QUIETLY)
+endif (ARGO_MONITOR_INCLUDES AND ARGO_ASRTM_INCLUDES AND ARGO_CONF_INCLUDE AND ARGO_MONITOR_LIBRARY AND ARGO_ASRTM_LIBRARY AND ARGO_CLI_COMMAND)
+
+if (HAVE_ARGO)
+  if (NOT ARGO_FIND_QUIETLY)
+    message (STATUS "Found components for ARGO")
+    message (STATUS "ARGO_INCLUDES .... = ${ARGO_INCLUDES}")
+    message (STATUS "ARGO_LIBRARIES ... = ${ARGO_LIBRARIES}")
+		message (STATUS "ARGO_CLI ......... = ${ARGO_CLI_COMMAND}")
+  endif (NOT ARGO_FIND_QUIETLY)
+else (HAVE_ARGO)
+  if (ARGO_FIND_QUIETLY)
+    message (FATAL_ERROR "Could not find ARGO!")
+  endif (ARGO_FIND_QUIETLY)
+endif (HAVE_ARGO)
+
+mark_as_advanced (
+  HAVE_ARGO
+  ARGO_INCLUDES
+  ARGO_LIBRARIES
+  ARGO_CLI_COMMAND
+  )

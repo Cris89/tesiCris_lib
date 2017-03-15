@@ -204,15 +204,15 @@ class server_handler():
                                 values.append( float(splitted[i]) )
                             
                             self.struct.addParamValues( values )
+                            
+                    elif( splitted[0] == "numOPs" ):
+                        self.struct.setNumOPs( int( splitted[1] ) )
                              
                     elif( splitted[0] == "doe" ):
                         self.struct.setDoeKind( splitted[1] )
 
                     elif( splitted[0] == "lhdSamples" ):
                         self.struct.setLhdSamples( int(splitted[1]) )
-                    
-                    elif( splitted[0] == "numOPs" ):
-                        self.struct.setNumOPs( int( splitted[1] ) )
                         
                     elif( splitted[0] == "rsm" ):
                         self.struct.setRsmKind( splitted[1] )

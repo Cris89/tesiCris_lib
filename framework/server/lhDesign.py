@@ -17,7 +17,7 @@ class lhDesign():
     
     def buildConfigurations( self ):
         lhd = lhs( len(self.paramsValues), samples = self.numSamples )
-         
+        
         for indexLHD, itemLHD in enumerate( lhd ):
             conf = []
             
