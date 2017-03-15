@@ -13,6 +13,9 @@ class appStruct():
         
         # default doe
         self.doeKind = "fcccd"
+
+        self.lhdSamples = None
+        
         self.numOPs = 1
         
         # default rsm
@@ -90,6 +93,16 @@ class appStruct():
     
     def getDoeKind( self ):
         return self.doeKind
+
+
+
+
+
+    def setLhdSamples( self, num ):
+        self.lhdSamples = num
+
+    def getLhdSamples( self ):
+        return self.lhdSamples
 
 
 

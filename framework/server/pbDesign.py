@@ -17,10 +17,10 @@ class pbDesign():
     def buildConfigurations( self ):
         pbd = pbdesign( len(self.paramsValues) )
          
-        for indexCCD, itemCCD in enumerate( pbd ):
+        for indexPBD, itemPBD in enumerate( pbd ):
             conf = []
             
-            for indexRow, itemRow in enumerate( itemCCD ):
+            for indexRow, itemRow in enumerate( itemPBD ):
                 parameterValues = self.paramsValues[indexRow]
                 
                 # value == 1 --> MAXValue of the corresponding parameter

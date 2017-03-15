@@ -17,10 +17,10 @@ class ff2lDesign():
     def buildConfigurations( self ):
         ff2l = ff2n( len(self.paramsValues) )
          
-        for indexCCD, itemCCD in enumerate( ff2l ):
+        for indexFF2L, itemFF2L in enumerate( ff2l ):
             conf = []
             
-            for indexRow, itemRow in enumerate( itemCCD ):
+            for indexRow, itemRow in enumerate( itemFF2L ):
                 parameterValues = self.paramsValues[indexRow]
                 
                 # value == 1 --> MAXValue of the corresponding parameter

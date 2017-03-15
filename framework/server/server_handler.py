@@ -207,6 +207,9 @@ class server_handler():
                              
                     elif( splitted[0] == "doe" ):
                         self.struct.setDoeKind( splitted[1] )
+
+                    elif( splitted[0] == "lhdSamples" ):
+                        self.struct.setLhdSamples( int(splitted[1]) )
                     
                     elif( splitted[0] == "numOPs" ):
                         self.struct.setNumOPs( int( splitted[1] ) )
