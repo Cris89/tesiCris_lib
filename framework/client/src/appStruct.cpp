@@ -17,7 +17,7 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 	numParams = numP;
 	numMetrics = numM;
 
-	argoOPs = new ArgoOPs();
+	operatingPoints = new OPs();
 
 	defaultConfiguration = defaultConf;
 
@@ -25,7 +25,7 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 
 	AppStruct::updateOPs();
 
-	argoOPs->makeOPs( configurationsList, numParams, newOPs );
+	operatingPoints->makeOPs( configurationsList, numParams, numMetrics, newOPs );
 
 
 
@@ -74,9 +74,9 @@ bool AppStruct::checkOPs()
 {
 	if( configurationsList != currentConfigurations )
 	{
-		argoOPs->makeOPs( configurationsList, numParams, newOPs);
-		argoOPs->makeOPs( currentConfigurations, numParams, notNewOPs);
-		argoOPs->makeCommonOPs();
+		operatingPoints->makeOPs( configurationsList, numParams, numMetrics, newOPs);
+		operatingPoints->makeOPs( currentConfigurations, numParams, numMetrics, notNewOPs);
+		operatingPoints->makeCommonOPs();
 		
 		return true;
 	}
@@ -101,9 +101,9 @@ char *AppStruct::getAppName_hostpid()
 	return appName_hostpid;
 }
 
-ArgoOPs *AppStruct::getArgoOPs()
+OPs *AppStruct::getOperatingPoints()
 {
-	return argoOPs;
+	return operatingPoints;
 }
 
 std::vector<float> AppStruct::getDefaultConfiguration()

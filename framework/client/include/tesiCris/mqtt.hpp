@@ -11,7 +11,11 @@
 class MQTT 
 {
 public:
-	MQTT( std::string IPaddress, std::string brokerPort, AppStruct &app, Topics &t );
+	MQTT( std::string IPaddress,
+			std::string brokerPort,
+			AppStruct &app,
+			Topics &t,
+			int threadSleepTime );
 
 	void connect();
 

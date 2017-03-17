@@ -20,7 +20,11 @@ int MQTT::rc;
 
 Topics *MQTT::topics;
 
-MQTT::MQTT( std::string IPaddress, std::string brokerPort, AppStruct &app, Topics &t )
+MQTT::MQTT( std::string IPaddress,
+			std::string brokerPort,
+			AppStruct &app,
+			Topics &t,
+			int threadSleepTime )
 {
 	appStruct = &app;
 	topics = &t;
@@ -50,7 +54,7 @@ MQTT::MQTT( std::string IPaddress, std::string brokerPort, AppStruct &app, Topic
 	rc = MQTTClient_create( &client, connectionAddress, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL );
 	rc = MQTTClient_setCallbacks( client, NULL, NULL, messageArrived, NULL );
 
-	pthread_create( &reqThread, NULL, MQTT::reqThreadFunc, NULL );
+	pthread_create( &reqThread, NULL, MQTT::reqThreadFunc, (void *)threadSleepTime );
 }
 
 void MQTT::connect()
@@ -194,13 +198,13 @@ void MQTT::publish( char *payload, const char *topicName )
 	printf( "\n\n%s publication\ntopic: %s\npayload: %s\n", clientID, topicName, payload );
 }
 
-void *MQTT::reqThreadFunc( void * )
+void *MQTT::reqThreadFunc( void *sleepTime )
 {
 	while( appStruct->getStatus() != AppStruct::autotuning )
 	{
 		MQTT::publish( appStruct->getHostpid(), topics->getReqTopic() );
 
-		std::this_thread::sleep_for( std::chrono::seconds(5) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( (long)sleepTime ) );
 	}
 }
 

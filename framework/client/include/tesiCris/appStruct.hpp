@@ -1,7 +1,7 @@
 #ifndef TESICRIS_APPSTRUCT_HPP
 #define TESICRIS_APPSTRUCT_HPP
 
-#include "tesiCris/argoOPs.hpp"
+#include "tesiCris/OPs.hpp"
 
 #include <vector>
 #include <deque>
@@ -30,7 +30,7 @@ public:
 	
 	char *getAppName_hostpid();
 	
-	ArgoOPs *getArgoOPs();
+	OPs *getOperatingPoints();
 
 	std::vector<float> getDefaultConfiguration();
 	
@@ -57,7 +57,7 @@ private:
 
 	bool areNewOPs;
 	
-	ArgoOPs *argoOPs;
+	OPs *operatingPoints;
 	
 	// application name + hostpid
 	// es.: "swaptions crisXPS15_1897"

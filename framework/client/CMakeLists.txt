@@ -13,14 +13,14 @@ set( CLIENT_HEADERS ${CLIENT_HDR_PATH}/tesiCris/appStruct.hpp
                     ${CLIENT_HDR_PATH}/tesiCris/framework.hpp
                     ${CLIENT_HDR_PATH}/tesiCris/mqtt.hpp
                     ${CLIENT_HDR_PATH}/tesiCris/topics.hpp
-		    ${CLIENT_HDR_PATH}/tesiCris/argoOPs.hpp
+		    ${CLIENT_HDR_PATH}/tesiCris/OPs.hpp
    )
 
 set( CLIENT_SOURCES ${CLIENT_SRC_PATH}/appStruct.cpp
                     ${CLIENT_SRC_PATH}/framework.cpp
                     ${CLIENT_SRC_PATH}/mqtt.cpp
                     ${CLIENT_SRC_PATH}/topics.cpp
-		    ${CLIENT_SRC_PATH}/argoOPs.cpp
+		    ${CLIENT_SRC_PATH}/OPs.cpp
    )
 
 # --------  Build the module

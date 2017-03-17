@@ -366,9 +366,9 @@ class appStruct():
         for op in self.OPsList:
             print op
 
-        print( "otherOPs:" )
-        for op in self.otherOPs:
-            print op
+        # print( "otherOPs:" )
+        # for op in self.otherOPs:
+        #     print op
 
         print( "\nDoEModel:" )
         for op in self.DoEsModelString:

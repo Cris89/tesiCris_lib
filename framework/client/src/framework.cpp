@@ -5,13 +5,27 @@
 #include <vector>
 #include <iostream>
 
-Framework::Framework( std::string name, int numParams, int numMetrics, std::vector<float> defaultConf, std::vector< std::string > info )
+Framework::Framework( std::string name,
+						int numParams,
+						int numMetrics,
+						std::vector<float> defaultConf,
+						std::vector< std::string > info,
+						int threadSleepTime )
 {
-	appStruct = new AppStruct( name, numParams, numMetrics, info, defaultConf );
+	appStruct = new AppStruct( name, 
+								numParams,
+								numMetrics,
+								info,
+								defaultConf );
 
-	topics = new Topics( appStruct->getAppName(), appStruct->getHostpidStr() );
+	topics = new Topics( appStruct->getAppName(),
+							appStruct->getHostpidStr() );
 
-	mqtt = new MQTT( IPaddress, brokerPort, *appStruct, *topics );
+	mqtt = new MQTT( IPaddress,
+						brokerPort,
+						*appStruct,
+						*topics,
+						threadSleepTime );
 }
 
 void Framework::checkOPs()

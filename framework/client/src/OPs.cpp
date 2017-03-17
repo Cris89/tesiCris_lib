@@ -1,28 +1,28 @@
-#include "tesiCris/argoOPs.hpp"
+#include "tesiCris/OPs.hpp"
 
 #include <algorithm>
 
-ArgoOPs::ArgoOPs()
+OPs::OPs()
 {
 
 }
 
-operating_points_t ArgoOPs::getCommonOPs()
+operating_points_t OPs::getCommonOPs()
 {
 	return commonOPs;
 }
 
-operating_points_t ArgoOPs::getCurrentOPs()
+operating_points_t OPs::getCurrentOPs()
 {
 	return currentOPs;
 }
 
-operating_points_t ArgoOPs::getNewOPs()
+operating_points_t OPs::getNewOPs()
 {
 	return newOPs;
 }
 
-void ArgoOPs::makeCommonOPs()
+void OPs::makeCommonOPs()
 {
 	commonOPs.clear();
 
@@ -41,7 +41,7 @@ void ArgoOPs::makeCommonOPs()
 	}
 }
 
-void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, bool areNew )
+void OPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, int numMetrics, bool areNew )
 {
 	if( areNew == true )
 	{
@@ -67,6 +67,10 @@ void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, boo
 				for( auto value : op )
 				{
 					params.push_back( value );
+				}
+
+				for( int i = 0; i < numMetrics; i++ )
+				{
 					metrics.push_back( fakeMetricsValues );
 				}
 
@@ -120,7 +124,7 @@ void ArgoOPs::makeOPs( std::vector< std::vector<float> > ops, int numParams, boo
 	}
 }
 
-ArgoOPs::~ArgoOPs()
+OPs::~OPs()
 {
 
 }

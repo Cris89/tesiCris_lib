@@ -15,7 +15,8 @@ public:
 				int numParams, 
 				int numMetrics, 
 				std::vector<float> defaultConf, 
-				std::vector< std::string > info );
+				std::vector< std::string > info,
+				int threadSleepTime );
 
 	bool changeOPs;
 
