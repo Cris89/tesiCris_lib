@@ -15,6 +15,7 @@ class sparkGenLinearRegr():
         Constructor
         '''
         self.tesiCris = "/home/cris/Documents/tesiCris/"
+        self.sparkFolderDir = "/home/cris/spark-2.1.0-bin-hadoop2.7/"
         
         self.appName = app
         
@@ -46,7 +47,7 @@ class sparkGenLinearRegr():
         self.manageSparkFolder()
         
         # popen variables
-        self.comand = "/home/cris/spark/bin/pyspark"
+        self.comand = self.sparkFolderDir + "bin/pyspark"
         self.args = self.comand.split(" ")
     
     def buildOPsList( self, OPs ):
