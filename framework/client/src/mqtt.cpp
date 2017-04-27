@@ -151,7 +151,7 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 
 		else if( payload == "disconnection" )
 		{
-			if( appStruct->getStatus() != AppStruct::doeModel || appStruct->getStatus() != AppStruct::autotuning )
+			if( appStruct->getStatus() != AppStruct::doeModel && appStruct->getStatus() != AppStruct::autotuning )
 			{
 				std::vector< std::vector<float> > defaultConf;
 				defaultConf.push_back( appStruct->getDefaultConfiguration() );
