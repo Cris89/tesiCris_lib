@@ -115,7 +115,7 @@ class sparkGenLinearRegr():
             
             sparkProc.stdin.write( "\n\n\n\n# " + metric[0] )
                 
-            sparkProc.stdin.write( "\n\nglr_" + metric[0] + " = GeneralizedLinearRegression( family = \"" + family + "\", link = \"" + link + "\" )" )       
+            sparkProc.stdin.write( "\n\nglr_" + metric[0] + " = GeneralizedLinearRegression( family = \"" + family + "\", link = \"" + link + "\", maxIter = 10 )" )       
             
             # training file
             
@@ -335,23 +335,22 @@ class sparkGenLinearRegr():
 \n" + trainingFilename + " = spark.read.format(\"libsvm\").load(\"" + sparkFolderMetricDir + "/" + trainingFilename + ".txt\")" )
                      
                     sparkProc.stdin.write( "\n\n# Fit the model on training data\
-\ntry:\
-\n\tmodel_" + featuresTransformations + "_" + link + " = glr_" + link + ".fit(" + trainingFilename + ")" )
+\nprint( \"" + metric + " - " + featuresTransformations + "_" + link + "\" )\
+\n\ntry:\
+\n\tmodel_" + featuresTransformations + "_" + link + " = glr_" + link + ".fit(" + trainingFilename + ")\
+\n\n\t# Summarize the model over the training set\
+\n\tsummary = model_" + featuresTransformations + "_" + link + ".summary\
+\n\n\t# compute the mean of the coefficient standard errors\
+\n\tsum = 0\
+\n\tfor coefficient in summary.coefficientStandardErrors:\
+\n\t\tsum += coefficient\
+\n\tmeanCoefStandErrs = sum / len(summary.coefficientStandardErrors)" )
                      
                     sparkProc.stdin.write( "\n\nexcept Exception:\
 \n\tprint( \"" + metric + " - " + featuresTransformations + "_" + link + ": can't fit this model\" )" )
                      
                     sparkProc.stdin.write( "\n\nelse:\
 \n\tmodels.append(model_" + featuresTransformations + "_" + link + ")" )
-                     
-                    sparkProc.stdin.write( "\n\n\t# Summarize the model over the training set\
-\n\tsummary = model_" + featuresTransformations + "_" + link + ".summary" )
-                     
-                    sparkProc.stdin.write( "\n\n\t# compute the mean of the coefficient standard errors\
-\n\tsum = 0\
-\n\tfor coefficient in summary.coefficientStandardErrors:\
-\n\t\tsum += coefficient\
-\n\tmeanCoefStandErrs = sum / len(summary.coefficientStandardErrors)" )
                      
                     sparkProc.stdin.write( "\n\n\tmodels_AIC_meanCoeffStandErrs_index_Dict[\"" + featuresTransformations + "_" + link + "\"] = [ summary.aic, meanCoefStandErrs, i ]" )
                      
