@@ -39,7 +39,7 @@ class sparkGenLinearRegr():
         
         # all the possible configurations (testing list values,
         # with witch spark will generate the complete model)
-        # es.: [ [6, 1, 100000], [6, 1, 200000], [6, 1, 300000], ..., [6, 2, 100000], [6, 2, 200000], ... ]
+        # es.: [ [6, 6, 6, 6, 6, ...], [1, 1, 1, 1, 1, ...], [100000, 200000, 300000, 400000, 500000, ...] ]
         self.testing = [ [] for _ in range( len(self.paramsValues) + 1 ) ]
         self.buildTestingValues()
         

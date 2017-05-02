@@ -177,6 +177,9 @@ class appStruct():
     
     def removeHostpid( self, hostpid ):
         self.hostpids.remove( hostpid )
+
+    def getHostpids( self ):
+        return self.hostpids
         
         
         

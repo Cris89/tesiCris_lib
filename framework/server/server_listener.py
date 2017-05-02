@@ -31,6 +31,8 @@ class listenerThread( threading.Thread ):
         self.hostpid = hostpid
         
     def run( self ):
+        global apps
+
         print( "\nstarting thread" + str(self.threadID) + " for application " + self.appName )
         
         if self.appName in apps:
@@ -83,8 +85,6 @@ def connect( IPaddress, brokerPort ):
     client.on_connect = on_connect( IPaddress, brokerPort )
     
 def subscribe( topic ):
-    global qos
-    
     client.subscribe( topic, qos = qos )
     client.on_subscribe = on_subscribe( topic )
     client.on_message = on_message
