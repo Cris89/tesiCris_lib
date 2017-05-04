@@ -49,10 +49,10 @@ class doeThread( threading.Thread ):
             end_doe_t = datetime.datetime.now()
             delta_doe_t = end_doe_t - start_doe_t
 
-            times_f = "/home/cris/Documents/tests/" + self.name + "/times.txt"
+            times_f = "/home/cris/Documents/tests/" + self.appStruct.getName() + "/times.txt"
             timesFile = open( times_f, "a" )
 
-            timesFile.write( "DoE: " + str( delta_doe_t.total_seconds() ) )
+            timesFile.write( "DoE: " + str( delta_doe_t.total_seconds() ) + " seconds" )
             timesFile.write( "\n\n\n" )
 
             timesFile.close()
@@ -126,10 +126,10 @@ class rsmThread( threading.Thread ):
 
             delta_dse_t = end_dse_t - start_dse_t
 
-            times_f = "/home/cris/Documents/tests/" + self.name + "/times.txt"
+            times_f = "/home/cris/Documents/tests/" + self.appStruct.getName() + "/times.txt"
             timesFile = open( times_f, "a" )
 
-            timesFile.write( "DSE: " + str( delta_dse_t.total_seconds() ) )
+            timesFile.write( "DSE: " + str( delta_dse_t.total_seconds() ) + " seconds" )
             timesFile.write( "\n\n\n" )
 
             timesFile.close()
@@ -146,7 +146,7 @@ class rsmThread( threading.Thread ):
             ########## execution info
             ####################################################################################################
             ####################################################################################################
-            info_f = "/home/cris/Documents/tests/" + self.name + "/info.txt"
+            info_f = "/home/cris/Documents/tests/" + self.appStruct.getName() + "/info.txt"
             infoFile = open( info_f, "a" )
 
             infoFile.write( "DoE: " + self.appStruct.getDoeKind() + "\n")
@@ -186,10 +186,10 @@ class rsmThread( threading.Thread ):
 
             delta_model_t = end_model_t - start_model_t
 
-            times_f = "/home/cris/Documents/tests/" + self.name + "/times.txt"
+            times_f = "/home/cris/Documents/tests/" + self.appStruct.getName() + "/times.txt"
             timesFile = open( times_f, "a" )
 
-            timesFile.write( "predicted_model: " + str( delta_model_t.total_seconds() ) )
+            timesFile.write( "model_prediction: " + str( delta_model_t.total_seconds() ) + " seconds" )
             timesFile.write( "\n\n\n" )
 
             timesFile.close()
@@ -210,7 +210,7 @@ class rsmThread( threading.Thread ):
             ########## predicted model
             ####################################################################################################
             ####################################################################################################
-            predicted_model_f = "/home/cris/Documents/tests/" + self.name + "/predicted_model.txt"
+            predicted_model_f = "/home/cris/Documents/tests/" + self.appStruct.getName() + "/predicted_model.txt"
             modelFile = open( predicted_model_f, "a" )
 
             infoRow = ""
