@@ -373,6 +373,9 @@ class server_handler():
                                 values.append( float(splitted[i]) )
                             
                             self.struct.addParamValues( values )
+
+                    elif( splitted[0] == "numFeats" ):
+                        self.struct.setNumFeatures( int( splitted[1] ) )
                             
                     elif( splitted[0] == "numOPs" ):
                         self.struct.setNumOPs( int( splitted[1] ) )

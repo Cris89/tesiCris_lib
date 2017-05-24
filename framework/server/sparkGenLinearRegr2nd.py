@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 
-class sparkGenLinearRegr():
+class sparkGenLinearRegr2nd():
     '''
     classdocs
     '''
@@ -31,16 +31,29 @@ class sparkGenLinearRegr():
         self.transformations = transforms
         
         self.paramsValues = paramVs
+
+        # compute the number of terms of the polynomial expansion of parameters
+        # grade 1 terms
+        self.polyExpNumTerms += len( self.paramsValues )
+        # cross product terms
+        for i in range( len(self.paramsValues) -1 ):
+            for j in range( i + 1, len(self.paramsValues) ):
+                self.polyExpNumTerms += 1
+        # square terms
+        self.polyExpNumTerms += len( self.paramsValues )
         
         # parameters and metrics (in this order)
         # es.: [ [1.0, 1.0, 1.0], [100000.0, 100000.0, 100000.0], [5.4573, 6.0573, 5.7573], [32.584, 31.004, 33.0] ]
-        self.OPsList = [ [] for _ in range( len(self.metrics) + len(self.paramsValues) ) ]       
+        self.OPsList2nd = [ [] for _ in range( self.polyExpNumTerms + len(self.metrics) ) ]       
         self.buildOPsList2nd( OPs )
-        
-        # all the possible configurations (testing list values,
-        # with witch spark will generate the complete model)
+
+        # all the possible configurations
+        # (testing list values,
+        # with witch spark will generate the complete model
+        # that also contain
+        # the relative polynomial expansion)
         # es.: [ [6, 6, 6, 6, 6, ...], [1, 1, 1, 1, 1, ...], [100000, 200000, 300000, 400000, 500000, ...] ]
-        self.testing = [ [] for _ in range( len(self.paramsValues) + 1 ) ]
+        self.testing = [ [] for _ in range( self.polyExpNumTerms + 1 ) ]
         self.buildTestingValues()
         
         # spark folder
@@ -55,9 +68,30 @@ class sparkGenLinearRegr():
             string = string.replace( ":", " " )
             
             splitted = string.split(" ")
+
+            # grade 1 terms
+            for i in range( len(paramsValues) ):
+                self.OPsList2nd[i].append( float(splitted[i]) )
             
-            for i in range( len(splitted) ):
-                self.OPsList[i].append( float(splitted[i]) )
+            currentIndex = len(paramsValues)
+
+            # cross product terms
+            for i in range( len(paramsValues) - 1 ):
+                for j in range( i + 1, len(paramsValues) ):
+                    crossProduct = float( splitted[i] ) * float( splitted[j] )
+                    self.OPsList2nd[currentIndex].append( crossProduct )
+                    currentIndex += 1
+
+            # square terms
+            for i in range( len(paramsValues) ):
+                square = float( splitted[i] ) + float( splitted[i] )
+                self.OPsList2nd[currentIndex].append( square )
+                currentIndex += 1
+
+            # metrics terms
+            for i in range( len(paramsValues), len(splitted) ):
+                self.OPsList2nd[currentIndex].append( float( splitted[i] ) )
+                currentIndex += 1
     
     def buildTestingValues( self ):
         # create all the possible configurations (testing list values,
@@ -70,6 +104,21 @@ class sparkGenLinearRegr():
             self.testing[0].append( fakePrediction )
             for i in range( len(tupla) ):
                 self.testing[i + 1].append( tupla[i] )
+
+            currentIndex = len(tupla) + 1
+
+            # cross products
+            for i in range( len(tupla) - 1 ):
+                for j in range( i + 1, len(tupla) ):
+                    crossProduct = tupla[i] * tupla[j]
+                    self.testing[currentIndex].append( crossProduct )
+                    currentIndex += 1
+
+            # square terms
+            for term in tupla:
+                square = term * term
+                self.testing[currentIndex].append( square )
+                currentIndex += 1
     
     def manageSparkFolder( self ):
         # spark folder
@@ -96,131 +145,131 @@ class sparkGenLinearRegr():
         
         return self.finalModel()
     
-    def knownModel( self, sparkProc ):
-        # possible parameters transformations, final libsvm files
-        lib = libsvm()
+#     def knownModel( self, sparkProc ):
+#         # possible parameters transformations, final libsvm files
+#         lib = libsvm()
         
-        sparkProc.stdin.write( "from pyspark.ml.regression import GeneralizedLinearRegression\
-\nfrom pyspark.sql import SparkSession" )  
-        sparkProc.stdin.write( "\n\nspark = SparkSession.builder.appName(\"LinearRegression\").getOrCreate()" )            
+#         sparkProc.stdin.write( "from pyspark.ml.regression import GeneralizedLinearRegression\
+# \nfrom pyspark.sql import SparkSession" )  
+#         sparkProc.stdin.write( "\n\nspark = SparkSession.builder.appName(\"LinearRegression\").getOrCreate()" )            
                         
-        for metric in self.transformations.items():
-            # es.: metric[0]: "avg_throughput"
-            #      metric[1]: ["ln", "ln", "gaussian", "log"]       
+#         for metric in self.transformations.items():
+#             # es.: metric[0]: "avg_throughput"
+#             #      metric[1]: ["ln", "ln", "gaussian", "log"]       
             
-            # es.: "gaussian"
-            family = metric[1][ len(self.paramsValues) ]
-            # es.: "log"
-            link = metric[1][ len(self.paramsValues) + 1 ]
+#             # es.: "gaussian"
+#             family = metric[1][ len(self.paramsValues) ]
+#             # es.: "log"
+#             link = metric[1][ len(self.paramsValues) + 1 ]
             
-            sparkProc.stdin.write( "\n\n\n\n# " + metric[0] )
+#             sparkProc.stdin.write( "\n\n\n\n# " + metric[0] )
                 
-            sparkProc.stdin.write( "\n\nglr_" + metric[0] + " = GeneralizedLinearRegression( family = \"" + family + "\", link = \"" + link + "\", maxIter = 10 )" )       
+#             sparkProc.stdin.write( "\n\nglr_" + metric[0] + " = GeneralizedLinearRegression( family = \"" + family + "\", link = \"" + link + "\", maxIter = 10 )" )       
             
-            # training file
+#             # training file
             
-            # training list values
-            training = []          
+#             # training list values
+#             training = []          
             
-            # add metric values to training list
-            metricV = copy.deepcopy( self.OPsList[ len(self.paramsValues) + 
-                                          self.transformations.keys().index(metric[0]) ] )
-            training.append( metricV )
+#             # add metric values to training list
+#             metricV = copy.deepcopy( self.OPsList2nd[ len(self.paramsValues) + 
+#                                           self.transformations.keys().index(metric[0]) ] )
+#             training.append( metricV )
             
-            # add parameters values to training list
-            for feature in range( 0, len(self.paramsValues) ):
-                featureV = copy.deepcopy( self.OPsList[feature] )
-                training.append( featureV )
+#             # add parameters values to training list
+#             for feature in range( 0, len(self.paramsValues) ):
+#                 featureV = copy.deepcopy( self.OPsList2nd[feature] )
+#                 training.append( featureV )
                 
-            lib.insertInput( training )
+#             lib.insertInput( training )
             
-            trainingFilename = "training_" + metric[0] + "_"
+#             trainingFilename = "training_" + metric[0] + "_"
             
-            for feature in range( 0, len(self.paramsValues) ):
-                if( metric[1][feature] == "id" ):
-                    trainingFilename += "id" + str(feature + 1)
+#             for feature in range( 0, len(self.paramsValues) ):
+#                 if( metric[1][feature] == "id" ):
+#                     trainingFilename += "id" + str(feature + 1)
                     
-                elif( metric[1][feature] == "ln" ):
-                    lib.lnFeature( feature + 1 )
+#                 elif( metric[1][feature] == "ln" ):
+#                     lib.lnFeature( feature + 1 )
                      
-                    trainingFilename += "ln" + str(feature + 1)
+#                     trainingFilename += "ln" + str(feature + 1)
                  
-                elif( metric[1][feature] == "sqrt" ):
-                    lib.sqrtFeature( feature + 1 )
+#                 elif( metric[1][feature] == "sqrt" ):
+#                     lib.sqrtFeature( feature + 1 )
                      
-                    trainingFilename += "sqrt" + str(feature + 1)
+#                     trainingFilename += "sqrt" + str(feature + 1)
                  
-                elif( metric[1][feature] == "inv" ):
-                    lib.invFeature( feature + 1 )
+#                 elif( metric[1][feature] == "inv" ):
+#                     lib.invFeature( feature + 1 )
                      
-                    trainingFilename += "inv" + str(feature + 1)
+#                     trainingFilename += "inv" + str(feature + 1)
             
-            # training modifications in order to let the linear regression work
-            # es.: if link function == "log", metrics must not be < limit value
-            lib.correctMetrics( link )
+#             # training modifications in order to let the linear regression work
+#             # es.: if link function == "log", metrics must not be < limit value
+#             lib.correctMetrics( link )
             
-            # final training libsvm file
-            lib.libsvmfile( self.sparkFolder + trainingFilename + ".txt" )
+#             # final training libsvm file
+#             lib.libsvmfile( self.sparkFolder + trainingFilename + ".txt" )
             
-            sparkProc.stdin.write( "\n\n\n# load " + metric[0] + " training data\
-\n" + trainingFilename + " = spark.read.format(\"libsvm\").load(\"" + self.sparkFolder + trainingFilename + ".txt\")" )
+#             sparkProc.stdin.write( "\n\n\n# load " + metric[0] + " training data\
+# \n" + trainingFilename + " = spark.read.format(\"libsvm\").load(\"" + self.sparkFolder + trainingFilename + ".txt\")" )
                                 
-            sparkProc.stdin.write( "\n\n# fit " + metric[0] + " model on training data\
-\ntry:\
-\n\tmodel_" + metric[0] + " = glr_" + metric[0] + ".fit(" + trainingFilename + ")" )
+#             sparkProc.stdin.write( "\n\n# fit " + metric[0] + " model on training data\
+# \ntry:\
+# \n\tmodel_" + metric[0] + " = glr_" + metric[0] + ".fit(" + trainingFilename + ")" )
             
-            sparkProc.stdin.write( "\n\nexcept Exception:\
-\n\tprint( \"" + metric[0] + ": can't fit its model\" )" )
+#             sparkProc.stdin.write( "\n\nexcept Exception:\
+# \n\tprint( \"" + metric[0] + ": can't fit its model\" )" )
             
-            # testing file
-            values = copy.deepcopy( self.testing ) 
-            lib.insertInput( values )
+#             # testing file
+#             values = copy.deepcopy( self.testing ) 
+#             lib.insertInput( values )
             
-            featuresTransformations = ""
+#             featuresTransformations = ""
 
-            for feature in range( 0, len(self.paramsValues) ):
-                if( metric[1][feature] == "id" ):
-                    featuresTransformations += "id" + str(feature + 1)
+#             for feature in range( 0, len(self.paramsValues) ):
+#                 if( metric[1][feature] == "id" ):
+#                     featuresTransformations += "id" + str(feature + 1)
                     
-                elif( metric[1][feature] == "ln" ):
-                    lib.lnFeature( feature + 1 )
+#                 elif( metric[1][feature] == "ln" ):
+#                     lib.lnFeature( feature + 1 )
                      
-                    featuresTransformations += "ln" + str(feature + 1)
+#                     featuresTransformations += "ln" + str(feature + 1)
                  
-                elif( metric[1][feature] == "sqrt" ):
-                    lib.sqrtFeature( feature + 1 )
+#                 elif( metric[1][feature] == "sqrt" ):
+#                     lib.sqrtFeature( feature + 1 )
                      
-                    featuresTransformations += "sqrt" + str(feature + 1)
+#                     featuresTransformations += "sqrt" + str(feature + 1)
                  
-                elif( metric[1][feature] == "inv" ):
-                    lib.invFeature( feature + 1 )
+#                 elif( metric[1][feature] == "inv" ):
+#                     lib.invFeature( feature + 1 )
                      
-                    featuresTransformations += "inv" + str(feature + 1)
+#                     featuresTransformations += "inv" + str(feature + 1)
             
-            testingFilename = "testing_" + metric[0] + "_" + featuresTransformations
-            # es.: "testing_avg_throughput_ln1ln2"
+#             testingFilename = "testing_" + metric[0] + "_" + featuresTransformations
+#             # es.: "testing_avg_throughput_ln1ln2"
             
-            # final testing libsvm file
-            lib.libsvmfile( self.sparkFolder + testingFilename + ".txt" )
+#             # final testing libsvm file
+#             lib.libsvmfile( self.sparkFolder + testingFilename + ".txt" )
             
-            sparkProc.stdin.write( "\n\n# load " + metric[0] + " testing data\
-\n" + testingFilename + " = spark.read.format(\"libsvm\").load(\"" + self.sparkFolder + testingFilename + ".txt\")" )
+#             sparkProc.stdin.write( "\n\n# load " + metric[0] + " testing data\
+# \n" + testingFilename + " = spark.read.format(\"libsvm\").load(\"" + self.sparkFolder + testingFilename + ".txt\")" )
                         
-            sparkProc.stdin.write( "\n\n# " + metric[0] + " predictions\
-\npredictions_" + metric[0] + " = model_" + metric[0] + ".transform(" + testingFilename + ")" )
+#             sparkProc.stdin.write( "\n\n# " + metric[0] + " predictions\
+# \npredictions_" + metric[0] + " = model_" + metric[0] + ".transform(" + testingFilename + ")" )
             
-            sparkProc.stdin.write( "\n\nvalues_" + metric[0] + " = predictions_" + metric[0] + ".collect()" )
+#             sparkProc.stdin.write( "\n\nvalues_" + metric[0] + " = predictions_" + metric[0] + ".collect()" )
             
-            predictionsFilename = self.sparkFolder + "predictions_" + metric[0] + ".txt"
-            sparkProc.stdin.write( "\n\npreds_" + metric[0] + " = open(\"" + predictionsFilename + "\", \"a\")" )
+#             predictionsFilename = self.sparkFolder + "predictions_" + metric[0] + ".txt"
+#             sparkProc.stdin.write( "\n\npreds_" + metric[0] + " = open(\"" + predictionsFilename + "\", \"a\")" )
             
-            sparkProc.stdin.write( "\n\npreds_" + metric[0] + ".write(\"model: " + featuresTransformations + "_" + link + "\" + \"\\n\")" )
+#             sparkProc.stdin.write( "\n\npreds_" + metric[0] + ".write(\"model: " + featuresTransformations + "_" + link + "\" + \"\\n\")" )
             
-            sparkProc.stdin.write( "\n\nfor v in values_" + metric[0] + ":\
-\n\tpreds_" + metric[0] + ".write( str(v[\"prediction\"]) )\
-\n\tpreds_" + metric[0] + ".write(\"\\n\")" )
+#             sparkProc.stdin.write( "\n\nfor v in values_" + metric[0] + ":\
+# \n\tpreds_" + metric[0] + ".write( str(v[\"prediction\"]) )\
+# \n\tpreds_" + metric[0] + ".write(\"\\n\")" )
             
-            sparkProc.stdin.write( "\n\npreds_" + metric[0] + ".close()" )
+#             sparkProc.stdin.write( "\n\npreds_" + metric[0] + ".close()" )
     
     def unknownModel( self, sparkProc ):
         # possible parameters transformations, final libsvm files
@@ -247,12 +296,12 @@ class sparkGenLinearRegr():
             training = []
             
             # add metric values to training list
-            training.append( self.OPsList[ len(self.paramsValues) + 
+            training.append( self.OPsList2nd[ self.polyExpNumTerms + 
                                           self.metrics.index(metric) ] )
             
             # add parameters values to training list
-            for feature in range( 0, len(self.paramsValues) ):
-                training.append( self.OPsList[feature] )
+            for feature in range( self.polyExpNumTerms ):
+                training.append( self.OPsList2nd[feature] )
         
             sparkProc.stdin.write( "\n\nmodels_AIC_meanCoeffStandErrs_index_Dict = {}" )
             sparkProc.stdin.write( "\nmodels = []" )
@@ -261,12 +310,11 @@ class sparkGenLinearRegr():
             linkFunctions = ["identity", "log", "inverse" ]
              
             transformations = ["id", "ln", "inv", "sqrt"]
-            cartesianProduct = itertools.product(transformations, repeat = len( self.paramsValues ) )
-            # es.: 2 parameters --> ("id", "id"), ("id", "ln"), ("id", "inv"), ("id", "sqrt"), 
-            #                       ("ln", "id"), ("ln", "ln"), ...
-             
+            cartesianProduct = itertools.product(transformations, repeat = self.polyExpNumTerms )
+            # es.: 2 parameters --> 5 terms --> ("id", "id", "id", "id", "id"), ("id", "id", "id", "id", "ln"), ...
+
             for tupla in cartesianProduct:
-                # es.: ("id", "ln")
+                # es.: ("id", "id", "id", "id", "ln")
                 
                 # testing file
                 values = copy.deepcopy( self.testing ) 
@@ -291,7 +339,7 @@ class sparkGenLinearRegr():
                         featuresTransformations += item + str(index + 1)
                  
                 testingFilename = "testing_" + featuresTransformations
-                # es.: "testing_id1ln2"
+                # es.: "testing_id1id2id3id4ln5"
                 
                 # final testing libsvm file
                 lib.libsvmfile( sparkFolderMetricDir + "/" + testingFilename + ".txt" )
@@ -326,7 +374,7 @@ class sparkGenLinearRegr():
                     lib.correctMetrics( link )
                      
                     trainingFilename = "training_" + featuresTransformations + "_" + link
-                    # es.: "training_id1ln2_log"
+                    # es.: "training_id1id2id3id4ln5_log"
                     
                     # final training libsvm file
                     lib.libsvmfile( sparkFolderMetricDir + "/" + trainingFilename + ".txt" )
@@ -411,8 +459,8 @@ class sparkGenLinearRegr():
         for j in range( len( self.testing[0] ) ):
             op = ""
             
-            for i in range( 1, len( self.testing ) ):
-                if( i < len( self.testing ) - 1 ):
+            for i in range( 1, len( self.paramsValues ) + 1 ):
+                if( i < len( self.paramsValues ) ):
                     op += str( self.testing[i][j] ) + " "
                 
                 else:

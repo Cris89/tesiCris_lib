@@ -1,4 +1,5 @@
 from sparkGenLinearRegr import sparkGenLinearRegr
+from sparkGenLinearRegr2nd import sparkGenLinearRegr2nd
 
 class rsm():
     '''
@@ -18,3 +19,12 @@ class rsm():
                                       self.appStruct.getParamsValues(),
                                       self.appStruct.getOPsList() )
             return rsm.buildModel()
+
+        elif( self.appStruct.getRsmKind() == "sparkGenLinRegr2nd" ):
+            rsm = sparkGenLinRegr2nd( self.appStruct.getName(),
+                                      self.appStruct.getMetrics(),
+                                      self.appStruct.getSparkGenLinearRegrTransforms(),
+                                      self.appStruct.getParamsValues(),
+                                      self.appStruct.getOPsList() )
+            return rsm.buildModel()
+

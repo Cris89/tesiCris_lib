@@ -34,6 +34,9 @@ class appStruct():
         # the order of the metrics must be the same here and in the opsList
         # es.: [ "avg_error", "avg_throughput" ]
         self.metrics = []
+
+        # number of features (default value = 0)
+        self.numFeatures = 0
         
         # lista di oggetti di tipo configuration
         self.doeConfs = []
@@ -44,7 +47,7 @@ class appStruct():
         # lista di oggetti di tipo configuration
         self.doneConfs = []
         
-        # parameters:metrics (in this order)
+        # parameters&features:metrics (in this order)
         # es.: [ ["1 100000:5.4573 32.584"], ["5 1000000:0.235 6.432"] ]
         self.OPsList = []
         
@@ -180,6 +183,13 @@ class appStruct():
 
     def getHostpids( self ):
         return self.hostpids
+        
+
+
+
+
+    def setNumFeatures( self, numF ):
+        self.numFeatures = numF
         
         
         
