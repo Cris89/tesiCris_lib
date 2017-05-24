@@ -34,7 +34,7 @@ class sparkGenLinearRegr2nd():
 
         # compute the number of terms of the polynomial expansion of parameters
         # grade 1 terms
-        self.polyExpNumTerms += len( self.paramsValues )
+        self.polyExpNumTerms = len( self.paramsValues )
         # cross product terms
         for i in range( len(self.paramsValues) -1 ):
             for j in range( i + 1, len(self.paramsValues) ):
@@ -70,26 +70,26 @@ class sparkGenLinearRegr2nd():
             splitted = string.split(" ")
 
             # grade 1 terms
-            for i in range( len(paramsValues) ):
+            for i in range( len(self.paramsValues) ):
                 self.OPsList2nd[i].append( float(splitted[i]) )
             
-            currentIndex = len(paramsValues)
+            currentIndex = len(self.paramsValues)
 
             # cross product terms
-            for i in range( len(paramsValues) - 1 ):
-                for j in range( i + 1, len(paramsValues) ):
+            for i in range( len(self.paramsValues) - 1 ):
+                for j in range( i + 1, len(self.paramsValues) ):
                     crossProduct = float( splitted[i] ) * float( splitted[j] )
                     self.OPsList2nd[currentIndex].append( crossProduct )
                     currentIndex += 1
 
             # square terms
-            for i in range( len(paramsValues) ):
-                square = float( splitted[i] ) + float( splitted[i] )
+            for i in range( len(self.paramsValues) ):
+                square = float( splitted[i] ) * float( splitted[i] )
                 self.OPsList2nd[currentIndex].append( square )
                 currentIndex += 1
 
             # metrics terms
-            for i in range( len(paramsValues), len(splitted) ):
+            for i in range( len(self.paramsValues), len(splitted) ):
                 self.OPsList2nd[currentIndex].append( float( splitted[i] ) )
                 currentIndex += 1
     
@@ -309,8 +309,9 @@ class sparkGenLinearRegr2nd():
         
             linkFunctions = ["identity", "log", "inverse" ]
              
-            transformations = ["id", "ln", "inv", "sqrt"]
-            cartesianProduct = itertools.product(transformations, repeat = self.polyExpNumTerms )
+            # transformations = ["id", "ln", "inv", "sqrt"]
+            transformations = ["id"]
+            cartesianProduct = itertools.product( transformations, repeat = self.polyExpNumTerms )
             # es.: 2 parameters --> 5 terms --> ("id", "id", "id", "id", "id"), ("id", "id", "id", "id", "ln"), ...
 
             for tupla in cartesianProduct:

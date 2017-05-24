@@ -180,7 +180,13 @@ class rsmThread( threading.Thread ):
             ####################################################################################################
             start_model_t = datetime.datetime.now()
 
-            model = self.rsm.buildRsm()
+            if( self.appStruct.getDoeKind() == "fullFact" or self.appStruct.getRsmKind() == "noRsm" ):
+                # first case: I already have the complete model since I have explored all the possible configurations
+                # second case: Rsm is not required --> the partial model is used
+                model = self.appStruct.getDoEsModelString()
+
+            else:
+                model = self.rsm.buildRsm()
 
             end_model_t = datetime.datetime.now()
 
@@ -313,7 +319,7 @@ class server_handler():
                 # se non conosco nulla dell'applicazione
                 self.requestAppInfo()        
             
-            if( self.struct.getStatus() == "dse" ):
+            elif( self.struct.getStatus() == "dse" ):
                 # se ci sono configurazioni da eseguire    
                 self.sendConfiguration( msg.payload )
 

@@ -21,7 +21,7 @@ class rsm():
             return rsm.buildModel()
 
         elif( self.appStruct.getRsmKind() == "sparkGenLinRegr2nd" ):
-            rsm = sparkGenLinRegr2nd( self.appStruct.getName(),
+            rsm = sparkGenLinearRegr2nd( self.appStruct.getName(),
                                       self.appStruct.getMetrics(),
                                       self.appStruct.getSparkGenLinearRegrTransforms(),
                                       self.appStruct.getParamsValues(),
