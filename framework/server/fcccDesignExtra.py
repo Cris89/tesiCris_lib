@@ -15,7 +15,10 @@ class fcccDesignExtra():
         self.numSamples = numSamples
         self.numOPs = numOPs
 
-        self.configurations = []
+        self.fcccdConfigurations = []
+        self.lhdConfigurations = []
+
+        self.configurationsObjectsList = []
     
     def buildConfigurations( self ):
         # fcccd configurations
@@ -39,20 +42,42 @@ class fcccDesignExtra():
                 elif itemRow == 0:
                     conf.append( parameterValues[ int( (len(parameterValues) / float(2)) - 0.5 ) ] )
             
-            config = configuration( conf, self.numOPs )
-            self.configurations.append( config )
+            self.fcccdConfigurations.append( conf )
 
         # lhd configurations
-        lhd = lhs( len(self.paramsValues), samples = self.numSamples )
-        for indexLHD, itemLHD in enumerate( lhd ):
-            conf = []
-            
-            for indexRow, itemRow in enumerate( itemLHD ):
-                parameterValues = self.paramsValues[indexRow]
+        lhdAgain = True
+
+        while( lhdAgain == True ):
+            self.lhdConfigurations = []
+
+            lhd = lhs( len(self.paramsValues), samples = self.numSamples )
+
+            for indexLHD, itemLHD in enumerate( lhd ):
+                found = False
+
+                conf = []
                 
-                conf.append( parameterValues[ int( len(parameterValues) * itemRow - 0.5 ) ] )
-            
-            config = configuration( conf, self.numOPs )
-            self.configurations.append( config )
+                for indexRow, itemRow in enumerate( itemLHD ):
+                    parameterValues = self.paramsValues[indexRow]
+                    
+                    conf.append( parameterValues[ int( len(parameterValues) * itemRow - 0.5 ) ] )
+
+                if( conf in self.fcccdConfigurations ):
+                    found = True
+                    break
+
+                else:
+                    self.lhdConfigurations.append( conf )
+
+            if( found == False ):
+                lhdAgain = False
         
-        return self.configurations
+        for conf in self.fcccdConfigurations:
+            config = configuration( conf, self.numOPs )
+            self.configurationsObjectsList.append( config )
+
+        for conf in self.lhdConfigurations:
+            config = configuration( conf, self.numOPs )
+            self.configurationsObjectsList.append( config )
+
+        return self.configurationsObjectsList        
