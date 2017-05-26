@@ -37,6 +37,9 @@ class appStruct():
 
         # number of features (default value = 0)
         self.numFeatures = 0
+
+        # minimum number of features observations for each feature value (default value = 1)
+        self.minNumObsFeatValues = 1
         
         # lista di oggetti di tipo configuration
         self.doeConfs = []
@@ -53,14 +56,25 @@ class appStruct():
         
         self.otherOPs = []
 
-        # key: configuration, values: metrics values list
-        # key es.: "1 100000"
-        # values es.: [5.123, 126.45768]
+
+
+        # key: configuration (params:features eventually)
+        # values:  [ [ sum of metrics values ], counter ]
+        
+        # key es.: "1 100000" OR "1 100000:500 600"
+        # values es.: [ [10.246, 252.45768], 2 ]
 
         # I update this dictionary adding metric values everytime I receive them;
-        # at the end I will divide metrics values by numOPs --> 
+        # at the end I will divide metrics values by counter --> 
         # every configuration will have metrics mean values 
         self.DoEsModel = {}
+
+
+        # key: feature id (0, 1, 2, ...)
+        # value: [ [ feature values ] [ observations during DSE ] ]
+        self.features = {}
+
+
 
         # String version of DoEsModel
         # es.: [ ["1 100000 5.4573 32.584"], ["8 500000 4.4573 30.584"], ... ]
@@ -140,19 +154,64 @@ class appStruct():
         print( "\nDoEsModel:" )
 
         for key, values in self.DoEsModel.iteritems():
-            opString = key
-            # opString es.: "1 100000"
+            if( ":" in key ):
+                # there are both parameters and features
+                splittedKey = key.split( ":" )
+                # splittedKey[0]: parameters
+                # splittedKey[1]: features
 
-            for i in range( len(values) ):
-                values[i] /= float( self.numOPs )
+                opString = splittedKey[0] + " " + splittedKey[1]
 
-                opString += " " + str( values[i] )
+            else:
+                # there are only parameters
+                opString = key
+
+            for i in range( len(values[0]) ):
+                values[0][i] /= float( values[1] )
+
+                opString += " " + str( values[0][i] )
 
             print( opString )
 
             self.DoEsModelString.append( opString )
 
         print( "\n##################################################" )
+
+
+
+
+
+    def createFeaturesDict( self ):
+        for i in range( self.numFeatures ):
+            self.features[i] = [ [], [] ]
+
+    def incrementFeatureCounter( self, key, featValue ):
+        for index, item in enumerate(self.features[key][0] ):
+            if( item == featValue ):
+                self.features[key][1][index] += 1
+
+    def addFeatureValue( self, key, featValue ):
+        self.features[key][0].append(featValue)
+        self.features[key][1].append(1)
+
+    def hasFeatureValue( self, key, featValue ):
+        if( featValue in self.features[key][0] ):
+            return True
+
+        else:
+            return False
+
+    def featuresBecomeParams( self ):
+        feats = self.features.values()
+
+        for f in feats:
+            featValues = []
+
+            for index, item in enumerate( f[1] ):
+                if( item >= self.minNumObsFeatValues ):
+                    featValues.append( f[0][index] )
+
+            self.paramsValues.append( featValues )
 
 
 

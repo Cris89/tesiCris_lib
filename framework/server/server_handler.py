@@ -186,6 +186,10 @@ class rsmThread( threading.Thread ):
                 model = self.appStruct.getDoEsModelString()
 
             else:
+                self.appStruct.featuresBecomeParams()
+
+                self.appStruct.showStruct()
+
                 model = self.rsm.buildRsm()
 
             end_model_t = datetime.datetime.now()
@@ -404,17 +408,36 @@ class server_handler():
                         self.struct.addMetricInfoToSparkGenLinearRegrTransforms( splitted[1], splitted[5] )
                     
                     elif( splitted[0] == "done" ):
+                        self.struct.createFeaturesDict()
+                        
                         self.struct.setStatus( "buildingDoe" )
                         
                         # notify the thread that computes the doeThread configurations
                         self.doeCond.notifyAll()
         
         elif( msg.topic == self.OPsTopic ):
-            # msg.payload es.: "1 100000:5.3454867 0.2343545"
+            # msg.payload es.: "1 100000:5.3454867 0.2343545" (params:metrics)
+            # OR
+            # msg.payload es.: "1 100000:500 600:5.3454867 0.2343545" (params:features:metrics)
             splitted = msg.payload.split(":")
-            # splitted[0]: configuration
-            # splitted[1]: metrics
-            
+
+
+
+            if( len(splitted) == 3 ):
+                # manage features in order to keep track features values and the relative number of observations during DSE
+                splittedFeatures = splitted[1].split( " " )
+
+                for index, item in enumerate( splittedFeatures ):
+                    featureFloat = float(item)
+
+                    if( self.struct.hasFeatureValue( index, featureFloat ) == True ):
+                        self.struct.incrementFeatureCounter( index, featureFloat )
+
+                    else:
+                        self.struct.addFeatureValue( index, featureFloat )
+
+
+
             configuration = []
             
             splittedConf = splitted[0].split(" ")
@@ -591,23 +614,40 @@ class server_handler():
         # splittedOP is a list of strings
         # splittedOP[0]: parameters, es.: "1 100000"
         # splittedOP[1]: metrics, es.: "5.2341 126.2"
+        # OR
+        # splittedOP[0]: parameters, es.: "1 100000"
+        # splittedOP[1]: features, es.: "500 600"
+        # splittedOP[2]: metrics, es.: "5.2341 126.2"
 
-        splittedOPMetrics = splittedOP[1].split(" ")
+        if( len(spittedOP) == 2 ):
+            splittedOPMetrics = splittedOP[1].split(" ")
+
+            key = splittedOP[0]
+
+        else:
+            splittedOPMetrics = splittedOP[2].split(" ")
+
+            key = splittedOP[0] + ":" + splittedOP[1]
+
         metricsValues = []
 
         for metr in splittedOPMetrics:
             metricsValues.append( float(metr) )
 
-        if( self.struct.HasDoEsModelKey( splittedOP[0] ) == True ):
-            values = self.struct.getDoEsModelKeyValues( splittedOP[0] )
+        if( self.struct.HasDoEsModelKey( key ) == True ):
+            values = self.struct.getDoEsModelKeyValues( key )
 
-            for i in range( len(values) ):
-                values[i] += metricsValues[i]
+            for i in range( len(values[0]) ):
+                values[0][i] += metricsValues[i]
 
-            self.struct.setDoEsModelKeyValues( splittedOP[0], values )
+            values[1] += 1
+
+            self.struct.setDoEsModelKeyValues( key, values )
 
         else:
-            self.struct.setDoEsModelKeyValues( splittedOP[0], metricsValues )
+            values = [ metricsValues, 1]
+            
+            self.struct.setDoEsModelKeyValues( key, values )
 
     def sendDoEsModel( self, hostpid ):
         if( hostpid not in self.DoEModelSent ):
