@@ -12,7 +12,8 @@ class Framework
 {
 public:
 	Framework( std::string name, 
-				int numParams, 
+				int numParams,
+				int numFeatures,
 				int numMetrics, 
 				std::vector<float> defaultConf, 
 				std::vector< std::string > info,
@@ -27,6 +28,8 @@ public:
 	void init();
 	
 	void sendResult( std::string op );
+
+	void storeFeatures( std::vector<float> features );
 	
 	void updateOPs();
 

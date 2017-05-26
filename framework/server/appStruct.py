@@ -249,11 +249,18 @@ class appStruct():
 
     def setNumFeatures( self, numF ):
         self.numFeatures = numF
+
+
+
+
+
+    def setMinNumObsFeatValues( self, value ):
+        self.minNumObsFeatValues = value
+
         
         
         
-        
-        
+                
     def setNumOPs( self, num ):
         self.numOPs = num
     
@@ -407,47 +414,64 @@ class appStruct():
         print( "\nparameters:" )
         print( self.params )
         print( self.paramsValues )
+
+        print( "\nnumFeatures: " + str( self.numFeatures ) )
+        if( self.numFeatures != 0 ):
+            print( "minNumObsFeatValues: " + str( self.minNumObsFeatValues ) )
+
+        if( len( self.features ) != 0 ):
+            print( "\nfeatures:" )
+            print( self.features )
         
         print( "\nmetrics:" )
         print( self.metrics )
         
         print( "\ndoe: " + self.doeKind )
+        if( self.doeKind == "lhd" ):
+            print( "lhdSamples: " + str(self.lhdSamples) )
         print( "numOPs: " + str( self.numOPs ) )
 
         print( "\nrsm: " + self.rsmKind )
         
-        print( "\nsparkGenLinearRegrTransforms:" )
-        print( self.sparkGenLinearRegrTransforms )
+        if( len( self.sparkGenLinearRegrTransforms ) != 0 ):
+            print( "\nsparkGenLinearRegrTransforms:" )
+            print( self.sparkGenLinearRegrTransforms )
         
         print( "\nhostpids:" )
         print( self.hostpids )
         
-        print( "\ndoeConfs:" )
-        for confObj in self.doeConfs:
-            for value in confObj.getConf():
-                print value,
-            print( " [remaining OPs: " + str( confObj.getNumOPs() ) + "]" )
+        if( len( self.doeConfs ) != 0 ):
+            print( "\ndoeConfs:" )
+            for confObj in self.doeConfs:
+                for value in confObj.getConf():
+                    print value,
+                print( " [remaining OPs: " + str( confObj.getNumOPs() ) + "]" )
         
-        print( "\n\ndoneConfs:" )
-        for confObj in self.doneConfs:
-            for value in confObj.getConf():
-                print value,
-            print
+        if( len( self.doneConfs ) != 0 ):
+            print( "\n\ndoneConfs:" )
+            for confObj in self.doneConfs:
+                for value in confObj.getConf():
+                    print value,
+                print
         
-        print( "\nOPsList:" )
-        for op in self.OPsList:
-            print op
+        if( len( self.OPsList ) != 0 ):
+            print( "\nOPsList:" )
+            for op in self.OPsList:
+                print op
 
-        # print( "otherOPs:" )
-        # for op in self.otherOPs:
-        #     print op
+        # if( len( self.otherOPs ) != 0 ):
+        #     print( "otherOPs:" )
+        #     for op in self.otherOPs:
+        #         print op
 
-        print( "\nDoEModel:" )
-        for op in self.DoEsModelString:
-            print op
+        if( len( self.DoEsModelString ) != 0 ):
+            print( "\nDoEModel:" )
+            for op in self.DoEsModelString:
+                print op
 
-        print( "\nmodel:" )
-        for op in self.model:
-            print op
+        if( len( self.model ) != 0 ):  
+            print( "\nmodel:" )
+            for op in self.model:
+                print op
                     
         print( "\n##################################################" )

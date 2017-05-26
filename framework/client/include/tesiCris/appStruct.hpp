@@ -18,7 +18,7 @@ public:
 	};
 
 	AppStruct();
-	AppStruct( std::string name, int numParams, int numMetrics, std::vector< std::string > i, std::vector<float> defaultConf );
+	AppStruct( std::string name, int numParams, int numFeatures, int numMetrics, std::vector< std::string > i, std::vector<float> defaultConf );
 	
 	void addOp( std::vector<float> op );
 	
@@ -29,6 +29,8 @@ public:
 	std::string getAppName();
 	
 	char *getAppName_hostpid();
+
+	std::vector<float> getFeatures();
 	
 	OPs *getOperatingPoints();
 
@@ -45,6 +47,8 @@ public:
 	appStatus getStatus();
 	
 	void setConfigurationsList( std::vector< std::vector<float> > confsList );
+
+	void setFeatures( std::vector<float> feats );
 	
 	void setStatus( appStatus s );
 	
@@ -63,8 +67,6 @@ private:
 	// es.: "swaptions crisXPS15_1897"
 	char *appName_hostpid;
 	
-	// hostname_pid
-	// es.: "crisXPS15_1897"
 	// double-ended queue che contiene le configurazioni con cui l'app deve essere eseguita
 	std::vector< std::vector<float> > configurationsList;
 	
@@ -74,6 +76,9 @@ private:
 	// default configuration
 	std::vector<float> defaultConfiguration;
 
+	// vector in which possible features values are stored
+	std::vector<float> features;
+
 	char *hostpid;
 	
 	// double-ended queue che contiene il modello
@@ -82,6 +87,8 @@ private:
 	std::vector< std::vector<float> > model;
 
 	int numMetrics;
+
+	int numFeatures;
 
 	int numParams;
 

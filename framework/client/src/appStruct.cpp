@@ -9,12 +9,13 @@ AppStruct::AppStruct()
 
 }
 
-AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::string > i, std::vector<float> defaultConf )
+AppStruct::AppStruct( std::string name, int numP, int numF, int numM, std::vector< std::string > i, std::vector<float> defaultConf )
 {
 	appName = name;
 	info = i;
 
 	numParams = numP;
+	numFeatures = numF;
 	numMetrics = numM;
 
 	operatingPoints = new OPs();
@@ -25,7 +26,7 @@ AppStruct::AppStruct( std::string name, int numP, int numM, std::vector< std::st
 
 	AppStruct::updateOPs();
 
-	operatingPoints->makeOPs( configurationsList, numParams, numMetrics, newOPs );
+	operatingPoints->makeOPs( configurationsList, numParams + numFeatures, numMetrics, newOPs );
 
 
 
@@ -74,8 +75,8 @@ bool AppStruct::checkOPs()
 {
 	if( configurationsList != currentConfigurations )
 	{
-		operatingPoints->makeOPs( configurationsList, numParams, numMetrics, newOPs);
-		operatingPoints->makeOPs( currentConfigurations, numParams, numMetrics, notNewOPs);
+		operatingPoints->makeOPs( configurationsList, numParams + numFeatures, numMetrics, newOPs);
+		operatingPoints->makeOPs( currentConfigurations, numParams + numFeatures, numMetrics, notNewOPs);
 		operatingPoints->makeCommonOPs();
 		
 		return true;
@@ -99,6 +100,11 @@ std::string AppStruct::getAppName()
 char *AppStruct::getAppName_hostpid()
 {
 	return appName_hostpid;
+}
+
+std::vector<float> AppStruct::getFeatures()
+{
+	return features;
 }
 
 OPs *AppStruct::getOperatingPoints()
@@ -140,6 +146,31 @@ AppStruct::appStatus AppStruct::getStatus()
 void AppStruct::setConfigurationsList( std::vector< std::vector<float> > confsList )
 {
 	configurationsList = confsList;
+}
+
+void AppStruct::setFeatures( std::vector<float> feats )
+{
+	features = feats;
+
+	if( status == AppStruct::defaultStatus )
+	{
+		// update defaultConfiguration with new feature values
+		std::vector<float> newDefaultConf;
+
+		// add params values
+		for( int i = 0; i < numParams; i++ )
+		{
+			newDefaultConf.push_back( defaultConfiguration[i] );
+		}
+
+		// add features values
+		for( int i = 0; i < features.size(); i++ )
+		{
+			newDefaultConf.push_back( features[i] );
+		}
+
+		configurationsList.push_back( newDefaultConf );
+	}
 }
 
 void AppStruct::setStatus( appStatus s)

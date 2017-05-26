@@ -386,6 +386,9 @@ class server_handler():
 
                     elif( splitted[0] == "numFeats" ):
                         self.struct.setNumFeatures( int( splitted[1] ) )
+
+                    elif( splitted[0] == "minNumObsFeatValues" ):
+                        self.struct.setMinNumObsFeatValues( int( splitted[1] ) )
                             
                     elif( splitted[0] == "numOPs" ):
                         self.struct.setNumOPs( int( splitted[1] ) )
@@ -619,7 +622,7 @@ class server_handler():
         # splittedOP[1]: features, es.: "500 600"
         # splittedOP[2]: metrics, es.: "5.2341 126.2"
 
-        if( len(spittedOP) == 2 ):
+        if( len(splittedOP) == 2 ):
             splittedOPMetrics = splittedOP[1].split(" ")
 
             key = splittedOP[0]

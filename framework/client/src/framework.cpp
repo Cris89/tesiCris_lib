@@ -7,6 +7,7 @@
 
 Framework::Framework( std::string name,
 						int numParams,
+						int numFeatures,
 						int numMetrics,
 						std::vector<float> defaultConf,
 						std::vector< std::string > info,
@@ -14,6 +15,7 @@ Framework::Framework( std::string name,
 {
 	appStruct = new AppStruct( name, 
 								numParams,
+								numFeatures,
 								numMetrics,
 								info,
 								defaultConf );
@@ -65,6 +67,11 @@ void Framework::sendResult( std::string op )
 	std::strcpy(operatingPointP, op.c_str());
 
 	mqtt->publish( operatingPointP, topics->getOPsTopic() );
+}
+
+void Framework::storeFeatures( std::vector<float> features )
+{
+	appStruct->setFeatures( features );
 }
 
 void Framework::updateOPs()
