@@ -424,23 +424,6 @@ class server_handler():
             # msg.payload es.: "1 100000:500 600:5.3454867 0.2343545" (params:features:metrics)
             splitted = msg.payload.split(":")
 
-
-
-            if( len(splitted) == 3 ):
-                # manage features in order to keep track features values and the relative number of observations during DSE
-                splittedFeatures = splitted[1].split( " " )
-
-                for index, item in enumerate( splittedFeatures ):
-                    featureFloat = float(item)
-
-                    if( self.struct.hasFeatureValue( index, featureFloat ) == True ):
-                        self.struct.incrementFeatureCounter( index, featureFloat )
-
-                    else:
-                        self.struct.addFeatureValue( index, featureFloat )
-
-
-
             configuration = []
             
             splittedConf = splitted[0].split(" ")
@@ -451,7 +434,7 @@ class server_handler():
             
             for conf in self.struct.getDoeConfs():
                 if( conf.getConf() == configuration ):
-                    # if the configuration is not one of the done configurations
+                    # if the configuration is not a done configuration
                     newOP = True
                     
                     self.struct.addOP( msg.payload )
@@ -459,6 +442,23 @@ class server_handler():
                     self.manageConfForDoEsModel( splitted )
                     
                     conf.decrementNumOPs()
+
+
+
+                    if( len(splitted) == 3 ):
+                        # manage features in order to keep track features values and the relative number of observations during DSE
+                        splittedFeatures = splitted[1].split( " " )
+
+                        for index, item in enumerate( splittedFeatures ):
+                            featureFloat = float(item)
+
+                            if( self.struct.hasFeatureValue( index, featureFloat ) == True ):
+                                self.struct.incrementFeatureCounter( index, featureFloat )
+
+                            else:
+                                self.struct.addFeatureValue( index, featureFloat )
+
+
                     
                     if( conf.getNumOPs() == 0 ):
                         # if I have the right number of ops for this configuration

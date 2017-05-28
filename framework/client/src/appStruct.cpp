@@ -169,7 +169,7 @@ void AppStruct::setFeatures( std::vector<float> feats )
 			newDefaultConf.push_back( features[i] );
 		}
 
-		configurationsList.push_back( newDefaultConf );
+		AppStruct::setConfigurationsList( { newDefaultConf } );
 	}
 }
 

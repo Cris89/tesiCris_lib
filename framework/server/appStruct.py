@@ -413,8 +413,7 @@ class appStruct():
         
         print( "\nparameters:" )
         print( self.params )
-        print( self.paramsValues )
-
+        
         print( "\nnumFeatures: " + str( self.numFeatures ) )
         if( self.numFeatures != 0 ):
             print( "minNumObsFeatValues: " + str( self.minNumObsFeatValues ) )
@@ -422,6 +421,9 @@ class appStruct():
         if( len( self.features ) != 0 ):
             print( "\nfeatures:" )
             print( self.features )
+
+        print( "\nparametersValues:" )
+        print( self.paramsValues )
         
         print( "\nmetrics:" )
         print( self.metrics )
