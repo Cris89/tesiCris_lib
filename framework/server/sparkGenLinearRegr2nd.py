@@ -471,8 +471,8 @@ class sparkGenLinearRegr2nd():
             for j in range( len( self.testing[0] ) ):
                 op = ""
                 
-                for i in range( 1, len( self.testing ) ):
-                    if( i < len( self.testing ) - 1 ):
+                for i in range( 1, len( self.paramsValues ) + 1 ):
+                    if( i < len( self.paramsValues ) ):
                         op += str( self.testing[i][j] ) + " "
                     
                     else:
