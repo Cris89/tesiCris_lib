@@ -77,7 +77,7 @@ class appStruct():
 
 
         # String version of DoEsModel
-        # es.: [ ["1 100000 5.4573 32.584"], ["8 500000 4.4573 30.584"], ... ]
+        # es.: [ ["1 100000:5.4573 32.584"], ["8 500000:4.4573 30.584"], ... ]
         self.DoEsModelString = []
         
         # features and metrics (in this order)
@@ -166,10 +166,16 @@ class appStruct():
                 # there are only parameters
                 opString = key
 
+            opString += ":"
+
             for i in range( len(values[0]) ):
                 values[0][i] /= float( values[1] )
 
-                opString += " " + str( values[0][i] )
+                if( i < len( values[0] ) - 1 ):
+                    opString += str( values[0][i] ) + " "
+                
+                else:
+                    opString += str( values[0][i] )
 
             print( opString )
 

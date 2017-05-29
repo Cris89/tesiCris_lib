@@ -10,7 +10,7 @@ class sparkGenLinearRegr2nd():
     '''
     classdocs
     '''
-    def __init__( self, app, metrs, transforms, paramVs, OPs ):
+    def __init__( self, app, metrs, transforms, paramVs, OPs, partialModel):
         '''
         Constructor
         '''
@@ -55,6 +55,8 @@ class sparkGenLinearRegr2nd():
         # es.: [ [6, 6, 6, 6, 6, ...], [1, 1, 1, 1, 1, ...], [100000, 200000, 300000, 400000, 500000, ...] ]
         self.testing = [ [] for _ in range( self.polyExpNumTerms + 1 ) ]
         self.buildTestingValues()
+
+        self.DoEModel = partialModel
         
         # spark folder
         self.manageSparkFolder()
@@ -437,46 +439,63 @@ class sparkGenLinearRegr2nd():
             sparkProc.stdin.write( "\n\npredictions.close()\n" )
 
     def finalModel( self ):
-        # collect all the predictions (list of metric predictions lists)
-        predictions = []
-         
-        for metric in self.metrics:
-            predictionsMetric = []
-            with open( self.sparkFolder + "predictions_" + metric + ".txt", 'r' ) as csvfile:
-                tracereader = csv.reader( csvfile )
-                for row in tracereader:
-                    for element in row:
-                        predictionsMetric.append( element )
-            
-            # delete the first row with model info
-            predictionsMetric.pop(0)
-            
-            predictions.append( predictionsMetric )        
-        
-        # create the complete ops list (strings with parameters and metrics values)
-        model = []
-        modelFile = open( self.tesiCris + self.appName + "/model.txt", "a" )
-        
-        for j in range( len( self.testing[0] ) ):
-            op = ""
-            
-            for i in range( 1, len( self.paramsValues ) + 1 ):
-                if( i < len( self.paramsValues ) ):
-                    op += str( self.testing[i][j] ) + " "
-                
-                else:
-                    op += str( self.testing[i][j] ) + ":"
-            
-            for i in range( len(predictions) ):
-                if( i < len( predictions ) - 1 ):
-                    op += str( predictions[i][j] ) + " "
-                
-                else:
-                    op += str( predictions[i][j] )
-            
-            model.append( op )
-            modelFile.write( op + "\n" )
-        
-        modelFile.close()
+        modelExists = True
 
-        return model
+        for metric in self.metrics:
+            if( os.path.exists( self.sparkFolder + "predictions_" + metric + ".txt" ) == False ):
+                modelExists = False
+
+            break
+
+        if( modelExists == True ):
+            # collect all the predictions (list of metric predictions lists)
+            predictions = []
+             
+            for metric in self.metrics:
+                predictionsMetric = []
+                with open( self.sparkFolder + "predictions_" + metric + ".txt", 'r' ) as csvfile:
+                    tracereader = csv.reader( csvfile )
+                    for row in tracereader:
+                        for element in row:
+                            predictionsMetric.append( element )
+                
+                # delete the first row with model info
+                predictionsMetric.pop(0)
+                
+                predictions.append( predictionsMetric )        
+            
+            # create the complete ops list (strings with parameters and metrics values)
+            model = []
+            modelFile = open( self.tesiCris + self.appName + "/model.txt", "a" )
+            
+            for j in range( len( self.testing[0] ) ):
+                op = ""
+                
+                for i in range( 1, len( self.testing ) ):
+                    if( i < len( self.testing ) - 1 ):
+                        op += str( self.testing[i][j] ) + " "
+                    
+                    else:
+                        op += str( self.testing[i][j] ) + ":"
+                
+                for i in range( len(predictions) ):
+                    if( i < len( predictions ) - 1 ):
+                        op += str( predictions[i][j] ) + " "
+                    
+                    else:
+                        op += str( predictions[i][j] )
+                
+                model.append( op )
+                modelFile.write( op + "\n" )
+            
+            modelFile.close()
+
+            return model
+
+        else:
+            modelFile = open( self.tesiCris + self.appName + "/model.txt", "a" )
+            
+            for op in self.DoEModel:
+                modelFile.write( op + "\n" )
+                
+            return self.DoEModel

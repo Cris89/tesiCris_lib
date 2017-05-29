@@ -17,7 +17,8 @@ class rsm():
                                       self.appStruct.getMetrics(),
                                       self.appStruct.getSparkGenLinearRegrTransforms(),
                                       self.appStruct.getParamsValues(),
-                                      self.appStruct.getOPsList() )
+                                      self.appStruct.getOPsList(),
+                                      self.appStruct.getDoEsModelString() )
             return rsm.buildModel()
 
         elif( self.appStruct.getRsmKind() == "sparkGenLinRegr2nd" ):
@@ -25,6 +26,7 @@ class rsm():
                                       self.appStruct.getMetrics(),
                                       self.appStruct.getSparkGenLinearRegrTransforms(),
                                       self.appStruct.getParamsValues(),
-                                      self.appStruct.getOPsList() )
+                                      self.appStruct.getOPsList(),
+                                      self.appStruct.getDoEsModelString() )
             return rsm.buildModel()
 

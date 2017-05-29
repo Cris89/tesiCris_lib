@@ -655,6 +655,8 @@ class server_handler():
     def sendDoEsModel( self, hostpid ):
         if( hostpid not in self.DoEModelSent ):
             for op in self.struct.getDoEsModelString():
+                op = op.replace( ":", " " )
+                
                 self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", op )
             
             self.publish( self.tesiCris + self.struct.getName() + "/" + hostpid + "/model", "DoEModelDone" )
