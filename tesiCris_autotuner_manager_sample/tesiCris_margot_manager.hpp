@@ -17,9 +17,11 @@ public:
 
 	void updateOPs();
 
-	void sendResult( std::vector<float> params, std::vector<float> metrics );
-	void sendResult( std::vector<float> params, std::vector<float> features, std::vector<float> metrics );
+	// the order of parameters and features in params_features must be lexicographic
+	// the order of metrics in metrics must be lexicographic
+	void sendResult( std::vector<float> params_features, std::vector<float> metrics );
 
+	// features must be in lexicographic order
 	void storeFeatures( std::vector<float> features );
 
 	virtual ~tesiCris_Margot_Manager();

@@ -7,19 +7,26 @@ tesiCris_Margot_Manager::tesiCris_Margot_Manager()
 
 void tesiCris_Margot_Manager::init()
 {
-	std::string appName = "sleepApp2params1feature";
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////// Configuration part
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	std::string appName = "app2params1feature";
 
 	int numParams = 2;
 	int numFeatures = 1;
 	int numMetrics = 2;
 
+	// the order of parameters and features must be lexicographic
+	// es. parameters: "aaa" and "ccc", features: "bbb" --> aaa = 100, bbb = 150, ccc = 360
+	std::vector<float> defaultConfiguration = { 100, 150, 360 };
+	
+	// in this case, 150 and 360 are parameters values
+	std::vector<int> params_indexes = { 1, 2 };
+	
+	// in this case, 100 is a feature value
+	std::vector<int> features_indexes = { 0 };
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////// good_func
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	std::vector<float> defaultConfiguration = { 150, 360, 100 };
-
+	// metrics and parameters must follow a lexicographic order
 	std::vector< std::string > info = { "metric avg_error",
 										"metric avg_throughput",
 
@@ -27,38 +34,10 @@ void tesiCris_Margot_Manager::init()
 										"param param2 range 10 850 70",
 
 										"numFeats 1",
-										"minNumObsFeatValues 9",
+										"minNumObsFeatValues 3",
 
-										"doe fcccd",
+										"doe fcccdExtra",
 										"lhdSamples 10",
-										"numOPs 5",
-
-										"rsm sparkGenLinRegr2nd" };
-
-	// milliseconds
-	int threadMQTTReqSleepTime = 3000;
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////// good_func
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-	/*////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////// strange_func
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	std::vector<float> defaultConfiguration = {15, 10, 10};
-
-	std::vector< std::string > info = { "metric avg_error",
-										"metric avg_throughput",
-
-										"param param1 enum 1 10 15 25 40 65 80",
-										"param param2 enum 1 5 10 20",
-										"param param3 range 10 46 3",
-
-										"doe fcccd",
-										
-										"lhdSamples 10",
-
 										"numOPs 1",
 
 										"rsm sparkGenLinRegr2nd" };
@@ -66,8 +45,10 @@ void tesiCris_Margot_Manager::init()
 	// milliseconds
 	int threadMQTTReqSleepTime = 3000;
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////// strange_func
-	////////////////////////////////////////////////////////////////////////////////////////////////////*/
+	////////// Configuration part
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+
 
 
 
@@ -78,6 +59,8 @@ void tesiCris_Margot_Manager::init()
 										numMetrics,
 
 										defaultConfiguration,
+										params_indexes,
+										features_indexes,
 										
 										info,
 											
@@ -158,25 +141,72 @@ void tesiCris_Margot_Manager::updateOPs()
 		margot::sleeping::manager.remove_operating_points(currentOPs);
 		margot::sleeping::manager.add_operating_points(commonOPs);
 
-		margot::sleeping::manager.dump();
+		// margot::sleeping::manager.dump();
 
 		tesiCris_framework->updateOPs();
 	}
 }
 
-void tesiCris_Margot_Manager::sendResult( std::vector<float> params, std::vector<float> metrics )
+// the order of parameters and features in params_features must be lexicographic
+// the order of metrics in metrics must be lexicographic
+void tesiCris_Margot_Manager::sendResult( std::vector<float> params_features, std::vector<float> metrics )
 {
 	std::string operatingPoint;
 
-	for( int i = 0; i < params.size(); i++ )
+	std::vector<int> fs_idx = tesiCris_framework->getAppStruct()->getFeaturesIndexes();
+
+	std::vector<float> ps_v;
+	std::vector<float> fs_v;
+
+
+
+	const int num_params_features = params_features.size();
+	for( int i = 0; i < num_params_features; ++i )
 	{
-		operatingPoint += std::to_string( params[i] ) + " ";
+		bool is_feature = false;
+		
+		for( const int index : fs_idx )
+		{
+			if( i == index )
+			{
+				is_feature = true;
+				break;
+			}
+		}
+		
+		if( is_feature )
+		{
+			fs_v.emplace_back( params_features[i] );
+		}
+		
+		else
+		{
+			ps_v.emplace_back( params_features[i] );
+		}
+	}
+
+
+
+	const int num_params = ps_v.size();
+	for( int i = 0; i < num_params; i++ )
+	{
+		operatingPoint += std::to_string( ps_v[i] ) + " ";
 	}
 
 	operatingPoint = operatingPoint.substr( 0, operatingPoint.size() - 1 );
 	operatingPoint += ":";
 
-	for( int i = 0; i < metrics.size(); i++ )
+	const int num_feats = fs_v.size();
+	for( int i = 0; i < num_feats; i++ )
+	{
+		operatingPoint += std::to_string( fs_v[i] ) + " ";
+	}
+
+	operatingPoint = operatingPoint.substr( 0, operatingPoint.size() - 1 );
+	operatingPoint += ":";
+
+	const int num_metrics = metrics.size();
+	for( int i = 0; i < num_metrics; i++ )
 	{
 		operatingPoint += std::to_string( metrics[i] ) + " ";
 	}
@@ -186,36 +216,7 @@ void tesiCris_Margot_Manager::sendResult( std::vector<float> params, std::vector
 	tesiCris_framework->sendResult( operatingPoint );
 }
 
-void tesiCris_Margot_Manager::sendResult( std::vector<float> params, std::vector<float> features, std::vector<float> metrics )
-{
-	std::string operatingPoint;
-
-	for( int i = 0; i < params.size(); i++ )
-	{
-		operatingPoint += std::to_string( params[i] ) + " ";
-	}
-
-	operatingPoint = operatingPoint.substr( 0, operatingPoint.size() - 1 );
-	operatingPoint += ":";
-
-	for( int i = 0; i < features.size(); i++ )
-	{
-		operatingPoint += std::to_string( features[i] ) + " ";
-	}
-
-	operatingPoint = operatingPoint.substr( 0, operatingPoint.size() - 1 );
-	operatingPoint += ":";
-
-	for( int i = 0; i < metrics.size(); i++ )
-	{
-		operatingPoint += std::to_string( metrics[i] ) + " ";
-	}
-
-	operatingPoint = operatingPoint.substr( 0, operatingPoint.size() - 1 );
-
-	tesiCris_framework->sendResult( operatingPoint );
-}
-
+// features must be in lexicographic order
 void tesiCris_Margot_Manager::storeFeatures( std::vector<float> features )
 {
 	tesiCris_framework->storeFeatures( features );
