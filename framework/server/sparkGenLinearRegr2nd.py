@@ -280,7 +280,7 @@ class sparkGenLinearRegr2nd():
         sparkProc.stdin.write( "from pyspark.ml.regression import GeneralizedLinearRegression\
 \nfrom pyspark.sql import SparkSession" )
  
-        sparkProc.stdin.write( "\n\nspark = SparkSession.builder.appName(\"LinearRegressionBruteForce\").getOrCreate()" )
+        sparkProc.stdin.write( "\n\nspark = SparkSession.builder.appName(\"LinearRegression2ndBruteForce\").getOrCreate()" )
         
         sparkProc.stdin.write( "\n\nglr_identity = GeneralizedLinearRegression( family = \"gaussian\", link = \"identity\" )" )
         sparkProc.stdin.write( "\nglr_log = GeneralizedLinearRegression( family = \"gaussian\", link = \"log\" )" )
@@ -412,7 +412,7 @@ class sparkGenLinearRegr2nd():
              
             sparkProc.stdin.write( "\n\nbestConfigurations = []\
 \nfor configuration, aic_meanCoeffStandErrs_index in models_AIC_meanCoeffStandErrs_index_Dict.iteritems():\
-\n\tif aic_meanCoeffStandErrs_index[0] == minAIC_meanCoeffStandErrs[0] and aic_meanCoeffStandErrs_index[1] == minAIC_meanCoeffStandErrs[1]:\
+\n\tif( aic_meanCoeffStandErrs_index[0] == minAIC_meanCoeffStandErrs[0] and aic_meanCoeffStandErrs_index[1] == minAIC_meanCoeffStandErrs[1] ):\
 \n\t\tbestConfigurations.append(configuration)" )
              
             sparkProc.stdin.write( "\n\nconfName = bestConfigurations[0]\

@@ -213,8 +213,14 @@ class appStruct():
         for f in feats:
             featValues = []
 
+            if( self.minNumObsFeatValues > max( f[1] ) ):
+                minNum = max( f[1] )
+
+            else:
+                minNum = self.minNumObsFeatValues
+
             for index, item in enumerate( f[1] ):
-                if( item >= self.minNumObsFeatValues ):
+                if( item >= minNum ):
                     featValues.append( f[0][index] )
 
             self.paramsValues.append( featValues )

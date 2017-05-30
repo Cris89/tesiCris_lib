@@ -18,7 +18,17 @@ public:
 	};
 
 	AppStruct();
-	AppStruct( std::string name, int numParams, int numFeatures, int numMetrics, std::vector< std::string > i, std::vector<float> defaultConf );
+	AppStruct( std::string name,
+
+				int numParams,
+				int numFeatures,
+				int numMetrics,
+
+				std::vector< std::string > i,
+
+				std::vector<float> defaultConf,
+				std::vector<int> params_idx,
+				std::vector<int> feats_idx );
 	
 	void addOp( std::vector<float> op );
 	
@@ -43,8 +53,13 @@ public:
 	std::vector< std::string > getInfo();
 	
 	std::vector< std::vector<float> > getModel();
+
+	std::vector<int> getParametersIndexes();
+	std::vector<int> getFeaturesIndexes();
 	
 	appStatus getStatus();
+
+	std::vector<float> orderValues( std::vector<float> values );
 	
 	void setConfigurationsList( std::vector< std::vector<float> > confsList );
 
@@ -91,6 +106,11 @@ private:
 	int numFeatures;
 
 	int numParams;
+
+	// vectors that contain parameters and features indexes in order to build correctly
+	// the OPs for mARGOt autotuner
+	std::vector<int> parameters_indexes;
+	std::vector<int> features_indexes;
 
 	appStatus status;
 

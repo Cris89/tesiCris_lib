@@ -9,7 +9,17 @@ AppStruct::AppStruct()
 
 }
 
-AppStruct::AppStruct( std::string name, int numP, int numF, int numM, std::vector< std::string > i, std::vector<float> defaultConf )
+AppStruct::AppStruct( std::string name,
+
+						int numP,
+						int numF,
+						int numM,
+
+						std::vector< std::string > i,
+
+						std::vector<float> defaultConf,
+						std::vector<int> params_idx,
+						std::vector<int> feats_idx )
 {
 	appName = name;
 	info = i;
@@ -17,6 +27,9 @@ AppStruct::AppStruct( std::string name, int numP, int numF, int numM, std::vecto
 	numParams = numP;
 	numFeatures = numF;
 	numMetrics = numM;
+
+	parameters_indexes = params_idx;
+	features_indexes = feats_idx;
 
 	operatingPoints = new OPs();
 
@@ -138,6 +151,41 @@ std::vector< std::vector<float> > AppStruct::getModel()
 	return model;
 }
 
+std::vector<float> AppStruct::orderValues( std::vector<float> values )
+{
+	std::vector<float> ordered_values;
+	ordered_values.resize( numParams + numFeatures );
+
+	int idx = 0;
+	// put parameters values in correct place
+	for( int i = 0; i < numParams; ++i, ++idx )
+	{
+		ordered_values[ parameters_indexes[i] ] = values[idx];
+	}
+	// eventually put features values in correct place
+	for( int i = 0; i < numFeatures; ++i, +idx )
+	{
+		ordered_values[ features_indexes[i] ] = values[idx];
+	}
+	// eventually put metrics values in correct place
+	for( int i = numParams + numFeatures; i < values.size(); i++ )
+	{
+		ordered_values.emplace_back( values[i] );
+	}
+
+	return ordered_values;
+}
+
+std::vector<int> AppStruct::getParametersIndexes()
+{
+	return parameters_indexes;
+}
+
+std::vector<int> AppStruct::getFeaturesIndexes()
+{
+	return features_indexes;
+}
+
 AppStruct::appStatus AppStruct::getStatus()
 {
 	return status;
@@ -155,18 +203,12 @@ void AppStruct::setFeatures( std::vector<float> feats )
 	if( status == AppStruct::defaultStatus )
 	{
 		// update defaultConfiguration with new feature values
-		std::vector<float> newDefaultConf;
+		std::vector<float> newDefaultConf = defaultConfiguration;
 
 		// add params values
-		for( int i = 0; i < numParams; i++ )
-		{
-			newDefaultConf.push_back( defaultConfiguration[i] );
-		}
-
-		// add features values
 		for( int i = 0; i < features.size(); i++ )
 		{
-			newDefaultConf.push_back( features[i] );
+			newDefaultConf[ features_indexes[i] ] = features[i];
 		}
 
 		AppStruct::setConfigurationsList( { newDefaultConf } );

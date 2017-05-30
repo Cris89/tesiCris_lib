@@ -124,7 +124,7 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 		std::vector< std::vector<float> > confsList;
 		std::vector<float> conf;
 
-		while (ss >> token)
+		while( ss >> token )
 		{
 			const char* numberptr = token.c_str();
 		    float number = atof( numberptr );
@@ -133,17 +133,15 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 
 		std::vector<float> features = appStruct->getFeatures();
 
-		// check if the app has features
-		if( features.empty() == false )
+		// add features values to configuration
+		for( int i = 0; i < features.size(); i++ )
 		{
-			// add features values to configuration
-			for( int i = 0; i < features.size(); i++ )
-			{
-				conf.push_back( features[i] );
-			}
+			conf.push_back( features[i] );
 		}
 
-		confsList.push_back( conf );
+		std::vector<float> orderedConf = appStruct->orderValues( conf );
+
+		confsList.push_back( orderedConf );
 		appStruct->setConfigurationsList( confsList );
 
 		if( appStruct->getStatus() != AppStruct::dse )
@@ -183,7 +181,9 @@ int MQTT::messageArrived( void *context, char *topicName, int topicLen, MQTTClie
 			    op.push_back( number );
 			}
 
-			appStruct->addOp( op );
+			std::vector<float> orderedOP = appStruct->orderValues( op );
+
+			appStruct->addOp( orderedOP );
 		}
 	}
 
