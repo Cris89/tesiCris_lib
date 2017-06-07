@@ -7,12 +7,9 @@
 
 Framework::Framework( std::string name,
 
-						int numParams,
-						int numFeatures,
 						int numMetrics,
 
 						std::vector<float> defaultConf,
-						std::vector<int> params_idx,
 						std::vector<int> features_idx,
 
 						std::vector< std::string > info,
@@ -21,14 +18,11 @@ Framework::Framework( std::string name,
 {
 	appStruct = new AppStruct( name,
 
-								numParams,
-								numFeatures,
 								numMetrics,
 
 								info,
 								
 								defaultConf,
-								params_idx,
 								features_idx );
 
 	topics = new Topics( appStruct->getAppName(),

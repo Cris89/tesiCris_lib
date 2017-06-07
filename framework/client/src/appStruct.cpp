@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
+#include <algorithm>
 
 AppStruct::AppStruct()
 {
@@ -11,29 +12,57 @@ AppStruct::AppStruct()
 
 AppStruct::AppStruct( std::string name,
 
-						int numP,
-						int numF,
 						int numM,
 
 						std::vector< std::string > i,
 
 						std::vector<float> defaultConf,
-						std::vector<int> params_idx,
 						std::vector<int> feats_idx )
 {
 	appName = name;
 	info = i;
 
-	numParams = numP;
-	numFeatures = numF;
 	numMetrics = numM;
-
-	parameters_indexes = params_idx;
 	features_indexes = feats_idx;
+	defaultConfiguration = defaultConf;
+	
+
+
+
+
+	if( features_indexes.empty() == true )
+	{
+		numParams = defaultConfiguration.size();
+		numFeatures = 0;
+
+		for( int i = 0; i < numParams; i++ )
+		{
+			parameters_indexes.emplace_back( i );
+		}
+	}
+	else
+	{
+		numFeatures = features_indexes.size();
+		numParams = defaultConfiguration.size() - numFeatures;
+
+		for( int i = 0; i < numParams + numFeatures; i++ )
+		{
+			if( std::find( features_indexes.begin(), features_indexes.end(), i ) != features_indexes.end() )
+			{
+				;
+			}
+			else
+			{
+				parameters_indexes.emplace_back( i );
+			}
+		}
+	}
+
+
+
+
 
 	operatingPoints = new OPs();
-
-	defaultConfiguration = defaultConf;
 
 	configurationsList.push_back( defaultConfiguration );
 

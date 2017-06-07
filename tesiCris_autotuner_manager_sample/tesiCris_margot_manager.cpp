@@ -10,19 +10,14 @@ void tesiCris_Margot_Manager::init()
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////// Configuration part
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	std::string appName = "app2params1feature";
+	std::string appName = "appName";
 
-	int numParams = 2;
-	int numFeatures = 1;
 	int numMetrics = 2;
 
 	// the order of parameters and features must be lexicographic
 	// es. parameters: "aaa" and "ccc", features: "bbb" --> aaa = 100, bbb = 150, ccc = 360
 	std::vector<float> defaultConfiguration = { 100, 150, 360 };
-	
-	// in this case, 150 and 360 are parameters values
-	std::vector<int> params_indexes = { 1, 2 };
-	
+
 	// in this case, 100 is a feature value
 	std::vector<int> features_indexes = { 0 };
 
@@ -53,13 +48,10 @@ void tesiCris_Margot_Manager::init()
 
 
 	tesiCris_framework = new Framework( appName,
-											
-										numParams,
-										numFeatures,
+
 										numMetrics,
 
 										defaultConfiguration,
-										params_indexes,
 										features_indexes,
 										
 										info,

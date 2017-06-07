@@ -20,14 +20,11 @@ public:
 	AppStruct();
 	AppStruct( std::string name,
 
-				int numParams,
-				int numFeatures,
 				int numMetrics,
 
 				std::vector< std::string > i,
 
 				std::vector<float> defaultConf,
-				std::vector<int> params_idx,
 				std::vector<int> feats_idx );
 	
 	void addOp( std::vector<float> op );
