@@ -177,7 +177,7 @@ class appStruct():
                 else:
                     opString += str( values[0][i] )
 
-            print( opString )
+            # print( opString )
 
             self.DoEsModelString.append( opString )
 
@@ -468,10 +468,10 @@ class appStruct():
                     print value,
                 print
         
-        if( len( self.OPsList ) != 0 ):
-            print( "\nOPsList:" )
-            for op in self.OPsList:
-                print op
+        # if( len( self.OPsList ) != 0 ):
+        #     print( "\nOPsList:" )
+        #     for op in self.OPsList:
+        #         print op
 
         # if( len( self.otherOPs ) != 0 ):
         #     print( "otherOPs:" )
