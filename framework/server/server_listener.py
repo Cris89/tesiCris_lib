@@ -47,6 +47,10 @@ class listenerThread( threading.Thread ):
             print( "\ncreating server_handler for application " + self.appName )
             
             handler = server_handler()
+
+            # for managing AgoraRemoteAppHandler disconnection
+            subscribe( root + self.appName )
+            
             handler.start( self.appName, self.hostpid )
         
         print( "\nexiting thread" + str(self.threadID) + " for application " + self.appName )
@@ -79,6 +83,14 @@ def on_message( client, userdata, msg ):
         thread.start()
         
         threadID += 1
+
+    elif( msg.payload == "disconnection" ):
+        # an AgoraRemoteAppHandler has disconnected
+        splittedTopic = msg.topic.split("/")
+        disconnectedApp = splittedTopic[-1]
+
+        if( disconnectedApp in apps ):
+            apps.remove( disconnectedApp )
 
 def connect( IPaddress, brokerPort ):
     client.connect( IPaddress, port = brokerPort )
