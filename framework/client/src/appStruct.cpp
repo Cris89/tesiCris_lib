@@ -192,7 +192,7 @@ std::vector<float> AppStruct::orderValues( std::vector<float> values )
 		ordered_values[ parameters_indexes[i] ] = values[idx];
 	}
 	// eventually put features values in correct place
-	for( int i = 0; i < numFeatures; ++i, +idx )
+	for( int i = 0; i < numFeatures; ++i, ++idx )
 	{
 		ordered_values[ features_indexes[i] ] = values[idx];
 	}
